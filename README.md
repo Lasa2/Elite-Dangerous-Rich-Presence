@@ -1,5 +1,5 @@
 # ED-RichPresence
-A standalone Discord Rich Presence application i wrote myself to learn python
+A standalone Discord Rich Presence application for Elite Dangerous i wrote myself to learn python
 
 Feel free to test it and notify me about bugs and general feedback
 
