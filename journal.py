@@ -162,6 +162,7 @@ class journalPresence:
                     self.journal.append(json.loads(line))
                     self.logger.debug("Add new journal entry")
                 time.sleep(15)
+            self.journal = []
 
     @threaded
     def journalReader(self):
