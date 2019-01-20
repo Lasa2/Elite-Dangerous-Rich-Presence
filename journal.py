@@ -279,7 +279,7 @@ class journalPresence:
             self.discordRichPresence["MultiplayerType"] = None
             self.discordRichPresence["MultiplayerText"] = None
         elif entry["event"] == "FSDJump":
-            self.discordRichPresence["Location"] = entry["Body"]
+            self.discordRichPresence["Location"] = entry["StarSystem"] + " - Supercruise"
 
     def presenceUpdate(self):
         self.logger.debug("Update Presence")
