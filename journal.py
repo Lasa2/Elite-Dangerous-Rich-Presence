@@ -92,12 +92,12 @@ class journalPresence:
     def checkRun(self):
         launcher = find_procs_by_name("EDLaunch.exe")
         game = find_procs_by_name("EliteDangerous64.exe")
-        if launcher.__len__() > 0:
-            if launcher[0].is_running():
-                return 1
         if game.__len__() > 0:
             if game[0].is_running():
                 return 2
+        if launcher.__len__() > 0:
+            if launcher[0].is_running():
+                return 1
         return 0
 
     def loadConfig(self, file, config={}):
