@@ -66,7 +66,7 @@ class journalPresence:
         self.logger = log("JournalPresence")
         self.config = self.loadConfig("config.ini", _ConfigDefault)
         self.journal = []
-        self.discordRichPresence = {"Location": "MainMenu", "GameMode": None, "CMDR": None, "Power": None, "LargeImageKey": "elite-dangerous-logo-2018", "PartySize": 1, "MultiplayerType": None, "MultiplayerText": None, "StartTime": calendar.timegm(time.gmtime())}
+        self.discordRichPresence = {"Location": "MainMenu", "GameMode": None, "CMDR": None, "Power": None, "LargeImageKey": "elite-dangerous-logo-2018", "PartySize": 0, "MultiplayerType": None, "MultiplayerText": None, "StartTime": calendar.timegm(time.gmtime())}
         self.logger.debug("journalDir: " + self.config["path.journaldir"])
         self.main()
 
@@ -79,6 +79,8 @@ class journalPresence:
             self.stop = False
             if process is 1:
                 self.logger.info("Launcher running wait 1 min")
+                self.discordRichPresence = {"Location": "Launcher", "GameMode": None, "CMDR": None, "Power": None, "LargeImageKey": "elite-dangerous-logo-2018", "PartySize": 0, "MultiplayerType": None, "MultiplayerText": None, "StartTime": calendar.timegm(time.gmtime())}
+                self.presenceUpdate()
                 time.sleep(60)
             elif process is 2:
                 self.logger.info("Game running continue loop")
@@ -175,7 +177,7 @@ class journalPresence:
     @threaded
     def journalReader(self):
         time.sleep(5)
-        self.startupEventsChecks()
+        self.discordRichPresence["StartTime"] = calendar.timegm(time.gmtime())
         while self.stop is not True:
             self.logger.debug("EventChecks")
             for entry in self.journal:
@@ -189,44 +191,44 @@ class journalPresence:
             self.presenceUpdate()
             time.sleep(15)
 
-    def startupEventsChecks(self):
-        self.logger.info("Startup Journal Check")
-        if self.journal[0]["event"] == "Fileheader":
-            self.logger.info("found Event: Fileheader")
-            for entry in self.journal:
-                if entry["event"] == "LoadGame":
-                    self.logger.debug("found Event: LoadGame")
-                    self.discordRichPresence["CMDR"] = entry["Commander"]
-                    self.discordRichPresence["GameMode"] = entry["GameMode"]
-                    self.discordRichPresence["LargeImageKey"] = entry["Ship"].lower()
-                elif entry["event"] == "Location":
-                    self.logger.debug("found Event: Location")
-                    Location = entry["StarSystem"]
-                    if entry["Docked"] is True:
-                        Location = Location + " @ " + entry["StationName"]
-                    elif "Body" in entry:
-                        Location = entry["Body"]
-                    self.discordRichPresence["Location"] = Location
-                elif entry["event"] == "Powerplay":
-                    self.discordRichPresence["Power"] = entry["Power"]
-
     def eventChecks(self, entry):
+        if entry["event"] == "Music" and entry["MusicTrack"] == "MainMenu":
+            self.discordRichPresence["Location"] = "Mainmenu"
+            self.discordRichPresence["GameMode"] = None
+            self.discordRichPresence["CMDR"] = None
+            self.discordRichPresence["Power"] = None
+            self.discordRichPresence["LargeImageKey"] = "elite-dangerous-logo-2018"
+            self.discordRichPresence["PartySize"] = 0
+            self.discordRichPresence["MultiplayerType"] = None
+            self.discordRichPresence["MultiplayerText"] = None
+        if entry["event"] == "LoadGame":
+            self.discordRichPresence["CMDR"] = entry["Commander"]
+            self.discordRichPresence["GameMode"] = entry["GameMode"]
+            self.discordRichPresence["LargeImageKey"] = entry["Ship"].lower()
+        elif entry["event"] == "Location":
+            if "Body" in entry:
+                if entry["BodyType"] == "Station":
+                    self.discordRichPresence["Location"] = entry["StarSystem"] + " @ " + entry["Body"]
+                else:
+                    self.discordRichPresence["Location"] = entry["Body"] + " - Normal Space"
+            else:
+                self.discordRichPresence["Location"] = entry["StarSystem"] + " - Normal Space"
+        elif entry["event"] == "Powerplay":
+            self.discordRichPresence["Power"] = entry["Power"]
         if entry["event"] == "ApproachBody":
             self.discordRichPresence["Location"] = entry["Body"] + " - Supercruise"
         elif entry["event"] == "Docked":
             self.discordRichPresence["Location"] = entry["StarSystem"] + " @ " + entry["StationName"] + "(" + str(int(entry["DistFromStarLS"])) + " ls)"
         elif entry["event"] == "LeaveBody":
             self.discordRichPresence["Location"] = entry["StarSystem"] + " - Supercruise"
-        elif entry["event"] == "Location":
-            if "StationName" in entry:
-                self.discordRichPresence["Location"] = entry["StarSystem"] + " @ " + entry["StationName"]
-            else:
-                self.logger.debug("Ignoring Location Event")
         elif entry["event"] == "SupercruiseEntry":
             self.discordRichPresence["Location"] = entry["StarSystem"] + " - Supercruise"
         elif entry["event"] == "SupercruiseExit":
             if "Body" in entry:
-                self.discordRichPresence["Location"] = entry["Body"] + " - Normal Space"
+                if entry["BodyType"] == "Station":
+                    self.discordRichPresence["Location"] = entry["StarSystem"] + " @ " + entry["Body"]
+                else:
+                    self.discordRichPresence["Location"] = entry["Body"] + " - Normal Space"
             else:
                 self.discordRichPresence["Location"] = entry["StarSystem"] + " - Normal Space"
         elif entry["event"] == "Outfitting":
@@ -244,48 +246,40 @@ class journalPresence:
         elif entry["event"] == "PowerplayLeave":
             self.discordRichPresence["Power"] = None
         elif entry["event"] == "CrewMemberJoins":
-            self.discordRichPresence["MultiplayerText"] = "Multicrew Captain"
+            self.discordRichPresence["MultiplayerText"] = "as aMulticrew Captain"
             self.discordRichPresence["MultiplayerType"] = "Multicrew"
             self.discordRichPresence["PartySize"] = self.discordRichPresence["PartySize"] + 1
         elif entry["event"] == "CrewMemberQuits":
-            self.discordRichPresence["MultiplayerText"] = "Multicrew Captain"
+            self.discordRichPresence["MultiplayerText"] = "as a Multicrew Captain"
             self.discordRichPresence["MultiplayerType"] = "Multicrew"
             self.discordRichPresence["PartySize"] = self.discordRichPresence["PartySize"] - 1
         elif entry["event"] == "EndCrewSession":
             self.discordRichPresence["MultiplayerType"] = None
             self.discordRichPresence["MultiplayerText"] = None
-            self.discordRichPresence["PartySize"] = 1
+            self.discordRichPresence["PartySize"] = 0
         elif entry["event"] == "JoinACrew":
-            self.discordRichPresence["MultiplayerText"] = "In CMDR´s " + entry["Captain"] + " crew"
+            self.discordRichPresence["MultiplayerText"] = "in CMDR´s " + entry["Captain"] + " crew"
             self.discordRichPresence["MultiplayerType"] = "Multicrew"
-            self.discordRichPresence["PartySize"] = None
+            self.discordRichPresence["PartySize"] = 0
         elif entry["event"] == "KickCrewMember":
-            self.discordRichPresence["MultiplayerText"] = "Multicrew Captain"
+            self.discordRichPresence["MultiplayerText"] = "as a Multicrew Captain"
             self.discordRichPresence["MultiplayerType"] = "Multicrew"
             self.discordRichPresence["PartySize"] = self.discordRichPresence["PartySize"] - 1
         elif entry["event"] == "QuitACrew":
             self.discordRichPresence["MultiplayerType"] = None
             self.discordRichPresence["MultiplayerText"] = None
-            self.discordRichPresence["PartySize"] = 1
+            self.config["richpresence.partysize"] = 0
         elif entry["event"] == "WingAdd":
-            self.discordRichPresence["MultiplayerText"] = "In Wing"
+            self.discordRichPresence["MultiplayerText"] = "in a Wing"
             self.discordRichPresence["MultiplayerType"] = "Wing"
-            self.discordRichPresence["PartySize"] = self.discordRichPresence["PartySize"] + 1
         elif entry["event"] == "WingJoin":
-            self.discordRichPresence["MultiplayerText"] = "In Wing"
+            self.discordRichPresence["MultiplayerText"] = "in a Wing"
             self.discordRichPresence["MultiplayerType"] = "Wing"
-            count = 0
-            for member in entry["Others"]:
-                count = count + 1
-            self.discordRichPresence["PartySize"] = count + 1
         elif entry["event"] == "WingLeave":
             self.discordRichPresence["MultiplayerType"] = None
             self.discordRichPresence["MultiplayerText"] = None
-            self.discordRichPresence["PartySize"] = 1
         elif entry["event"] == "FSDJump":
-            self.discordRichPresence["Location"] = "In " + entry["StarSystem"]
-        elif entry["event"] == "Continued":
-            self.status = "New File"
+            self.discordRichPresence["Location"] = entry["Body"]
 
     def presenceUpdate(self):
         self.logger.debug("Update Presence")
@@ -311,12 +305,10 @@ class journalPresence:
             rlarge_image = self.discordRichPresence["LargeImageKey"]
         else:
             rlarge_image = "elite-dangerous-logo-2018"
-        if self.discordRichPresence["MultiplayerType"] is None:
+        if self.config["richpresence.partysize"] is 0:
             rparty_size = None
-        elif self.discordRichPresence["MultiplayerType"] == "Multicrew" and self.config["richpresence.partysize"] is True:
+        elif self.discordRichPresence["MultiplayerType"] == "Multicrew" and self.config["richpresence.partysize"] is not None:
             rparty_size = self.discordRichPresence["PartySize"], 3
-        elif self.discordRichPresence["MultiplayerType"] == "Wing" and self.config["richpresence.partysize"] is True:
-            rparty_size = self.discordRichPresence["PartySize"], 4
         responde = self.RPC.update(state=rstate, details=rdetails, start=rstart, large_text=rlarge_text, large_image=rlarge_image, party_size=rparty_size)
         self.logger.debug(responde)
 
