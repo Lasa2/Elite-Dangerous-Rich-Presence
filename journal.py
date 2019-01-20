@@ -74,11 +74,17 @@ class journalPresence:
         self.logger.info("Init Discord Rich Presence")
         self.RPC = Presence(535809971867222036)
         self.RPC.connect()
-        while self.checkRun():
-            self.logger.info("Launcher/Game running continue loop")
+        process = self.checkRun()
+        while process > 0:
             self.stop = False
-            j = self.getJournal(self.config["path.journaldir"])
-            self.startThreads(j)
+            if process is 1:
+                self.logger.info("Launcher running wait 1 min")
+                time.sleep(60)
+            elif process is 2:
+                self.logger.info("Game running continue loop")
+                j = self.getJournal(self.config["path.journaldir"])
+                self.startThreads(j)
+            process = self.checkRun()
         self.logger.info("Launcher/Game not running stopped loop")
         self.logger.info("Closing Discord Rich Presence Client")
         self.RPC.close()
@@ -87,10 +93,12 @@ class journalPresence:
         launcher = find_procs_by_name("EDLaunch.exe")
         game = find_procs_by_name("EliteDangerous64.exe")
         if launcher.__len__() > 0:
-            return launcher[0].is_running()
+            if launcher[0].is_running():
+                return 1
         if game.__len__() > 0:
-            return game[0].is_running()
-        return False
+            if game[0].is_running():
+                return 2
+        return 0
 
     def loadConfig(self, file, config={}):
         """
