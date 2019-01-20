@@ -162,7 +162,7 @@ class journalPresence:
         file_descriptor = msvcrt.open_osfhandle(detached_handle, os.O_RDONLY)
         with open(file_descriptor, encoding="utf-8") as logfile:
             if self.journal == []:
-                self.logger.info("First journal read")
+                self.logger.info("Startup journal read")
                 for line in (logfile):
                     self.journal.append(json.loads(line))
             while self.stop is not True:
