@@ -9,11 +9,18 @@ handlers:
     level: INFO
     formatter: simple
     stream: ext://sys.stdout
+  file_debug:
+    class: logging.FileHandler
+    level: DEBUG
+    formatter: simple
+    filename: ed-rp.log
+    encoding: utf8
+    mode: w
 loggers:
   info:
-    level: INFO
-    handlers: [console]
+    level: DEBUG
+    handlers: [console,file_debug]
     propagate: no
 root:
-  level: INFO
-  handlers: [console]
+  level: DEBUG
+  handlers: [console,file_debug]
