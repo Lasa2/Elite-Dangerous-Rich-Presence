@@ -21,8 +21,7 @@ CONFIGDEFAULT = {
     "richpresence.multiplayertype": True,
     "richpresence.partysize": True,
     "richpresence.timeelapsed": True,
-    "richpresence.ship": True,
-    "debug.log": False
+    "richpresence.ship": True
 }
 CONFIG = os.path.dirname(os.path.realpath(__file__)) + "/logging.yaml"
 
@@ -88,6 +87,7 @@ class gui():
                 self.watch.mainThreadStopped()
                 break
             data = self.watch.presenceUpdate()
+            self.logger.debug("Sending RPC Update")
             responde = self.RPC.update(state=data["state"], details=data["details"], start=data["start"], large_text=data["large_text"], large_image=data["large_image"], party_size=data["party_size"])
         self.RPC.close()
         self.logger.debug("Main Loop Complete")

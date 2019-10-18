@@ -32,14 +32,16 @@ class watch():
             self.discordRichPresence["MultiplayerType"] = None
             self.discordRichPresence["MultiplayerText"] = None
             while self.getGame() and self.mainThread is True:
+                self.logger.info("Game running")
                 self.stop = False
                 self.journal = []
                 self.getJournal()
+                self.logger.debug("Starting Asyncio Tasks")
                 readTask = asyncio.create_task(self.readJournal())
                 pushTask = asyncio.create_task(self.journalCheck())
-                self.logger.info("Game running")
                 await readTask
                 await pushTask
+                self.logger.debug("Asyncio Tasks complete")
             await asyncio.sleep(15)
         self.logger.info("Closing Background Thread")
 
@@ -49,6 +51,7 @@ class watch():
 
     def getJournal(self):
         self.active_file = (0, None)
+        self.logger.debug("Scanning in " + self.config["path.journaldir"])
         with os.scandir(self.config["path.journaldir"]) as it:
             for entry in it:
                 if entry.is_file() and "Journal" in entry.name and ".log" in entry.name:
@@ -56,15 +59,18 @@ class watch():
                     new = str.replace(new, ".log", "")
                     if float(new) > float(self.active_file[0]):
                         self.active_file = (float(new), entry.name)
+        self.logger.debug("Active File: " + self.active_file[1])
 
     def getLauncher(self):
         if win32gui.FindWindow(None, "Elite Dangerous Launcher"):
+            self.logger.debug("Found Launcher Window")
             return True
         else:
             return False
 
     def getGame(self):
         if win32gui.FindWindow(None, "Elite - Dangerous (CLIENT)"):
+            self.logger.debug("Found Game Window")
             return True
         else:
             return False
@@ -76,10 +82,11 @@ class watch():
         file_descriptor = msvcrt.open_osfhandle(detached_handle, os.O_RDONLY)
 
         with open(file_descriptor, encoding="utf-8") as logfile:
+            self.logger.debug("reading journal " + self.active_file[1])
             while self.stop is not True and self.mainThread is True:
                 for line in (logfile):
                     self.journal.append(json.loads(line))
-                    self.logger.debug("Add new journal entry")
+                    self.logger.debug("Add new journal entrys")
                 await asyncio.sleep(15)
 
     async def journalCheck(self):
@@ -90,7 +97,7 @@ class watch():
                     self.logger.info("found Event: Shutdown - Breaking Loop")
                     self.stop = True
                 elif entry["event"] == "Continued":
-                    self.logger.info("found Event: Continued - Breaking Loop")
+                    self.logger.info("found Event: Continued - Breaking Loop to find new file")
                     self.stop = True
                 self.eventChecks(entry)
             await asyncio.sleep(15)
