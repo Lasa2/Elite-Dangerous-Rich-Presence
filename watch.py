@@ -53,7 +53,9 @@ class watch():
         self.active_file = (0, None)
         self.logger.debug("Scanning in " + self.config["path.journaldir"])
         with os.scandir(self.config["path.journaldir"]) as it:
+            self.logger.debug(it)
             for entry in it:
+                self.logger.debug(entry)
                 if entry.is_file() and "Journal" in entry.name and ".log" in entry.name:
                     new = str.replace(entry.name, "Journal.", "")
                     new = str.replace(new, ".log", "")
