@@ -4,3 +4,4 @@ dist/
 *.spec
 __pycache__/
 wiki/
+*.log

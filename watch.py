@@ -53,6 +53,7 @@ class watch():
             for entry in it:
                 if entry.is_file() and "Journal" in entry.name and ".log" in entry.name:
                     new = str.replace(entry.name, "Journal.", "")
+                    new = str.replace(new, "JournalBeta.", "")
                     new = str.replace(new, ".log", "")
                     if float(new) > float(self.active_file[0]):
                         self.active_file = (float(new), entry.name)
