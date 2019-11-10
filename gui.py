@@ -6,6 +6,7 @@ import os
 import re
 import threading
 import subprocess
+import time
 
 import PySimpleGUIQt as sg
 import yaml
@@ -23,8 +24,12 @@ CONFIGDEFAULT = {
     "richpresence.partysize": True,
     "richpresence.timeelapsed": True,
     "richpresence.ship": True,
-    "rungame.path": "S:/SteamLibrary/steamapps/common/Elite Dangerous/EDLaunch.exe",
+    "rungame.path": "C:/Program Files (x86)/Steam/steamapps/common/Elite Dangerous/EDLaunch.exe",
+    # "rungame.path": "C:/Program Files (x86)/Steam/Steam.exe",
+    "rungame.args": "",
+    # "rungame.args": "-applaunch 359320 /EDH",
     "rungame.run": True,
+    "rungame.wait": 10,
 }
 CONFIG = os.path.dirname(os.path.realpath(__file__)) + "/logging.yaml"
 
@@ -71,7 +76,7 @@ def loadConfig(file, config={}):
 class gui():
     def __init__(self):
         config = loadConfig("config.ini", config=CONFIGDEFAULT)
-        self.rungame = config["rungame.run"], config["rungame.path"]
+        self.rungame = config["rungame.run"], config["rungame.path"], config["rungame.args"], config["rungame.wait"]
         self.logger = log()
         self.watch = watch(config)
         self.RPC = Presence(535809971867222036)
@@ -101,7 +106,9 @@ class gui():
             if os.path.exists(self.rungame[1]):
                 self.logger.debug("Game Path exists")
                 try:
-                    subprocess.run(self.rungame[1])
+                    game = self.rungame[1] + " " + self.rungame[2]
+                    subprocess.Popen(game)
+                    time.sleep(self.rungame[3])
                 except Exception as e:
                     self.logger.error("Could not start Game: " + e)
             else:
