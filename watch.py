@@ -14,7 +14,7 @@ class watch():
     def __init__(self, config):
         self.logger = logging.getLogger(__name__)
         self.config = config
-        self.discordRichPresence = {"Location": "MainMenu", "GameMode": None, "CMDR": None, "Power": None, "LargeImageKey": "elite-dangerous-logo-2018", "PartySize": 0, "MultiplayerType": None, "MultiplayerText": None, "StartTime": calendar.timegm(time.gmtime())}
+        self.discordRichPresence = {"Location": "Main Menu", "GameMode": None, "CMDR": None, "Power": None, "LargeImageKey": "elite-dangerous-logo-2018", "PartySize": 0, "MultiplayerType": None, "MultiplayerText": None, "StartTime": calendar.timegm(time.gmtime())}
 
     async def main(self):
         self.logger.info("Started Background Thread")
@@ -100,7 +100,7 @@ class watch():
 
     def eventChecks(self, entry):
         if entry["event"] == "Music" and entry["MusicTrack"] == "MainMenu":
-            self.discordRichPresence["Location"] = "Mainmenu"
+            self.discordRichPresence["Location"] = "Main Menu"
             self.discordRichPresence["GameMode"] = None
             self.discordRichPresence["CMDR"] = None
             self.discordRichPresence["Power"] = None
