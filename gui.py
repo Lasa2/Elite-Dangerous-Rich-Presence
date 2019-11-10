@@ -5,6 +5,7 @@ import logging.config
 import os
 import re
 import threading
+import subprocess
 
 import PySimpleGUIQt as sg
 import yaml
@@ -22,7 +23,8 @@ CONFIGDEFAULT = {
     "richpresence.partysize": True,
     "richpresence.timeelapsed": True,
     "richpresence.ship": True,
-    "debug.log": False
+    "rungame.path": "S:/SteamLibrary/steamapps/common/Elite Dangerous/EDLaunch.exe",
+    "rungame.run": True,
 }
 CONFIG = os.path.dirname(os.path.realpath(__file__)) + "/logging.yaml"
 
@@ -69,6 +71,7 @@ def loadConfig(file, config={}):
 class gui():
     def __init__(self):
         config = loadConfig("config.ini", config=CONFIGDEFAULT)
+        self.rungame = config["rungame.run"], config["rungame.path"]
         self.logger = log()
         self.watch = watch(config)
         self.RPC = Presence(535809971867222036)
@@ -93,6 +96,16 @@ class gui():
         self.logger.debug("Main Loop Complete")
 
     def background(self):
+        self.logger.debug("Check if the Game should be started")
+        if self.watch.getGame() is False and self.watch.getLauncher() is False and self.rungame[0] is True:
+            if os.path.exists(self.rungame[1]):
+                self.logger.debug("Game Path exists")
+                try:
+                    subprocess.run(self.rungame[1])
+                except Exception as e:
+                    self.logger.error("Could not start Game: " + e)
+            else:
+                self.logger.warning("Game Path doesnt exists")
         self.logger.debug("Start Background Loop")
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
