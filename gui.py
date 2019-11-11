@@ -106,11 +106,12 @@ class gui():
             if os.path.exists(self.rungame[1]):
                 self.logger.debug("Game Path exists")
                 try:
+                    self.logger.debug("Try to start game")
                     game = self.rungame[1] + " " + self.rungame[2]
                     subprocess.Popen(game)
-                    time.sleep(self.rungame[3])
+                    time.sleep(int(self.rungame[3]))
                 except Exception as e:
-                    self.logger.error("Could not start Game: " + e)
+                    self.logger.error("Could not start Game: " + str(e))
             else:
                 self.logger.warning("Game Path doesnt exists")
         self.logger.debug("Start Background Loop")
