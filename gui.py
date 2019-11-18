@@ -97,6 +97,7 @@ class gui():
                 break
             data = self.watch.presenceUpdate()
             responde = self.RPC.update(state=data["state"], details=data["details"], start=data["start"], large_text=data["large_text"], large_image=data["large_image"], party_size=data["party_size"])
+            self.logger.debug(responde)
         self.RPC.close()
         self.logger.debug("Main Loop Complete")
 
