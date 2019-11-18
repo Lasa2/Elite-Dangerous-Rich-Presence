@@ -24,6 +24,7 @@ CONFIGDEFAULT = {
     "richpresence.partysize": True,
     "richpresence.timeelapsed": True,
     "richpresence.ship": True,
+    "richpresence.shiptext": True,
     "rungame.path": "C:/Program Files (x86)/Steam/steamapps/common/Elite Dangerous/EDLaunch.exe",
     # "rungame.path": "C:/Program Files (x86)/Steam/Steam.exe",
     "rungame.args": "",
