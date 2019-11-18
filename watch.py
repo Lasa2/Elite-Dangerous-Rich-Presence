@@ -205,7 +205,7 @@ class watch():
         rdetails = None
         rstart = None
         rlarge_text = None
-        rlarge_image = None
+        rlarge_image = "elite-dangerous-logo-2018"
         rparty_size = None
         shipnames = {"sidewinder": "Sidewinder", "eagle": "Eagle", "hauler": "Hauler", "adder": "Adder", "empire_eagle": "Imperial Eagle", "viper": "Viper Mk III", "cobramkiii": "Cobra Mk III", "viper_mkiv": "Viper Mk IV", "diamondback": "Diamondback Scout", "cobramkiv": "Cobra Mk IV", "type6": "Type-6 Transporter", "dolphin": "Dolphin", "diamondbackxl": "Diamondback Explorer", "empire_courier": "Imperial Courier", "independant_trader": "Keelback", "asp_scout": "Asp Scout", "vulture": "Vulture", "asp": "ASP Explorer", "ferderation_dropship_mkii": "Ferderal Assault Ship", "empire_trader": "Imperial Clipper", "typex_2": "Alliance Crusader", "typeex_3": "Alliance Challenger", "ferderation_gunship": "Ferderal Gunship", "krait_light": "Krait Phantom", "krait_mkii": "Krait Mk II", "orca": "Orca", "ferdelance": "Fer-de-Lance", "mamba": "Mamba", "python": "Python", "type9": "Type-9 Heavy", "belugaliner": "Beluga Liner", "type9_military": "Type-10 Defender", "anaconda": "Anaconda", "ferderation_corvette": "Ferderal Corvette", "cutter": "Imperial Cutter", "testbuggy": "SRV"}
         if self.config["richpresence.gamemode"] is True:
@@ -214,7 +214,7 @@ class watch():
             rstate = self.discordRichPresence["MultiplayerText"]
         if self.config["richpresence.cmdr"] is True and self.discordRichPresence["CMDR"] is not None:
             rlarge_text = "CMDR " + self.discordRichPresence["CMDR"]
-        if self.config["richpresence.shiptext"] is True and self.discordRichPresence["LargeImageKey"]:
+        if self.config["richpresence.shiptext"] is True and self.discordRichPresence["LargeImageKey"] != "elite-dangerous-logo-2018":
             rlarge_text = rlarge_text + " | " + shipnames[self.discordRichPresence["LargeImageKey"]]
         if self.discordRichPresence["Power"] is not None and self.config["richpresence.power"] is True:
             rlarge_text = rlarge_text + " | " + self.discordRichPresence["Power"]
@@ -224,8 +224,6 @@ class watch():
             rdetails = self.discordRichPresence["Location"]
         if self.config["richpresence.ship"] is True and self.discordRichPresence["LargeImageKey"]:
             rlarge_image = self.discordRichPresence["LargeImageKey"]
-        else:
-            rlarge_image = "elite-dangerous-logo-2018"
         if self.config["richpresence.partysize"] == 0:
             rparty_size = None
         elif self.discordRichPresence["MultiplayerType"] == "Multicrew" and self.config["richpresence.partysize"] is not None:
