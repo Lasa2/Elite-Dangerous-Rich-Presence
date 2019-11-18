@@ -35,6 +35,7 @@ class watch():
                 self.stop = False
                 self.journal = []
                 self.getJournal()
+                self.mainMenu()
                 readTask = asyncio.create_task(self.readJournal())
                 pushTask = asyncio.create_task(self.journalCheck())
                 self.logger.info("Game running")
@@ -98,16 +99,17 @@ class watch():
             if self.getGame() is not True:
                 self.stop = True
 
+    def mainMenu(self):
+        self.discordRichPresence["Location"] = "Main Menu"
+        self.discordRichPresence["GameMode"] = None
+        self.discordRichPresence["CMDR"] = None
+        self.discordRichPresence["Power"] = None
+        self.discordRichPresence["LargeImageKey"] = "elite-dangerous-logo-2018"
+        self.discordRichPresence["PartySize"] = 0
+        self.discordRichPresence["MultiplayerType"] = None
+        self.discordRichPresence["MultiplayerText"] = None
+
     def eventChecks(self, entry):
-        if entry["event"] == "Music" and entry["MusicTrack"] == "MainMenu":
-            self.discordRichPresence["Location"] = "Main Menu"
-            self.discordRichPresence["GameMode"] = None
-            self.discordRichPresence["CMDR"] = None
-            self.discordRichPresence["Power"] = None
-            self.discordRichPresence["LargeImageKey"] = "elite-dangerous-logo-2018"
-            self.discordRichPresence["PartySize"] = 0
-            self.discordRichPresence["MultiplayerType"] = None
-            self.discordRichPresence["MultiplayerText"] = None
         if entry["event"] == "LoadGame":
             self.discordRichPresence["CMDR"] = entry["Commander"]
             self.discordRichPresence["GameMode"] = entry["GameMode"]
