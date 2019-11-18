@@ -227,6 +227,3 @@ class watch():
             rparty_size = self.discordRichPresence["PartySize"], 3
 
         return {"state": rstate, "details": rdetails, "start": rstart, "large_text": rlarge_text, "large_image": rlarge_image, "party_size": rparty_size}
-        # self.logger.info(f"state={rstate}, details={rdetails}, start={rstart}, large_text={rlarge_text}, large_image={rlarge_image}, party_size={rparty_size}")
-        # responde = self.RPC.update(state=rstate, details=rdetails, start=rstart, large_text=rlarge_text, large_image=rlarge_image, party_size=rparty_size)
-        # self.logger.debug(responde)
