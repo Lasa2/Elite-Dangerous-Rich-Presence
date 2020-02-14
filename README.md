@@ -10,15 +10,23 @@ Check the [Wiki](https://github.com/Lasa2/Elite-Dangerous-Rich-Presence/wiki) to
 
 
 # Build from Source
-
+I tested this using Powershell and Python 3.8  
 Clone the reposity and install the requirements:
 ```
 git clone https://github.com/Lasa2/Elite-Dangerous-Rich-Presence.git
-cd Elite-Dangerous-Rich-Presence
+Set-Location Elite-Dangerous-Rich-Presence
+python -m venv .venv
+.venv/scripts/activate
 pip install -r requirements.txt
 ```
 To create a executable you can use pyinstaller:
 ```
+.venv/scripts/activate
 pip install pyinstaller
-pyinstaller gui.py -n "Elite Dangerous Rich Presence --add-data "elite-dangerous-clean.ico;." --add-data "logging.yaml;." --add-data "config.ini;." -w -i "elite-dangerous-clean.ico"
+.venv/scripts/pyinstaller gui.py -n 'Elite Dangerous Rich Presence' -i elite-dangerous-clean.ico -w `
+    --add-data 'elite-dangerous-clean.ico;.' --add-data 'logging.yaml;.' --add-data 'config.ini;.' `
+    -p '.venv/lib/site-packages' --add-binary '.venv/lib/site-packages/pywin32_system32/pythoncom38.dll;.' `
+    --add-binary '.venv/lib/site-packages/pywin32_system32/pywintypes38.dll;.' `
+    --exclude-module altgraph --exclude-module future --exclude-module pefile --exclude-module pyinstaller
+
 ```
