@@ -225,7 +225,7 @@ class watch():
             "independant_trader": "Keelback",
             "asp_scout": "Asp Scout",
             "vulture": "Vulture",
-            "asp": "ASP Explorer",
+            "asp": "Asp Explorer",
             "federation_dropship": "Federal Dropship",
             "type7": "Type-7 Transporter",
             "typex": "Alliance Chieftain",
