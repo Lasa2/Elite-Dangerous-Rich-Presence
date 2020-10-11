@@ -97,8 +97,8 @@ class gui():
                 self.watch.mainThreadStopped()
                 break
             data = self.watch.presenceUpdate()
-            responde = self.RPC.update(state=data["state"], details=data["details"], start=data["start"], large_text=data["large_text"], large_image=data["large_image"], party_size=data["party_size"])
-            self.logger.debug(responde)
+            response = self.RPC.update(state=data["state"], details=data["details"], start=data["start"], large_text=data["large_text"], large_image=data["large_image"], party_size=data["party_size"])
+            self.logger.debug(response)
         self.RPC.close()
         self.logger.debug("Main Loop Complete")
 
@@ -115,7 +115,7 @@ class gui():
                 except Exception as e:
                     self.logger.error("Could not start Game: " + str(e))
             else:
-                self.logger.warning("Game Path doesnt exists")
+                self.logger.warning("Game Path doesn't exists")
         self.logger.debug("Start Background Loop")
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
