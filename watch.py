@@ -14,7 +14,17 @@ class watch():
     def __init__(self, config):
         self.logger = logging.getLogger(__name__)
         self.config = config
-        self.discordRichPresence = {"Location": "Main Menu", "GameMode": None, "CMDR": None, "Power": None, "LargeImageKey": "elite-dangerous-logo-2018", "PartySize": 0, "MultiplayerType": None, "MultiplayerText": None, "StartTime": calendar.timegm(time.gmtime())}
+        self.discordRichPresence = {
+            "Location": "Main Menu",
+            "GameMode": None,
+            "CMDR": None,
+            "Power": None,
+            "LargeImageKey": "elite-dangerous-logo-2018",
+            "PartySize": 0,
+            "MultiplayerType": None,
+            "MultiplayerText": None,
+            "StartTime": calendar.timegm(time.gmtime())
+        }
 
     async def main(self):
         self.logger.info("Started Background Thread")
@@ -73,7 +83,15 @@ class watch():
 
     async def readJournal(self):
         journal = os.path.join(self.config["path.journaldir"], self.active_file[1])
-        handle = win32file.CreateFile(journal, win32file.GENERIC_READ, win32file.FILE_SHARE_DELETE | win32file.FILE_SHARE_READ | win32file.FILE_SHARE_WRITE, None, win32file.OPEN_EXISTING, 0, None)
+        handle = win32file.CreateFile(
+            journal,
+            win32file.GENERIC_READ,
+            win32file.FILE_SHARE_DELETE | win32file.FILE_SHARE_READ | win32file.FILE_SHARE_WRITE,
+            None,
+            win32file.OPEN_EXISTING,
+            0,
+            None
+        )
         detached_handle = handle.Detach()
         file_descriptor = msvcrt.open_osfhandle(detached_handle, os.O_RDONLY)
 
@@ -229,11 +247,11 @@ class watch():
             "federation_dropship": "Federal Dropship",
             "type7": "Type-7 Transporter",
             "typex": "Alliance Chieftain",
-            "federation_dropship_mkii": "Ferderal Assault Ship",
+            "federation_dropship_mkii": "Federal Assault Ship",
             "empire_trader": "Imperial Clipper",
             "typex_2": "Alliance Crusader",
             "typeex_3": "Alliance Challenger",
-            "federation_gunship": "Ferderal Gunship",
+            "federation_gunship": "Federal Gunship",
             "krait_light": "Krait Phantom",
             "krait_mkii": "Krait Mk II",
             "orca": "Orca",
@@ -244,7 +262,7 @@ class watch():
             "belugaliner": "Beluga Liner",
             "type9_military": "Type-10 Defender",
             "anaconda": "Anaconda",
-            "federation_corvette": "Ferderal Corvette",
+            "federation_corvette": "Federal Corvette",
             "cutter": "Imperial Cutter",
             "testbuggy": "SRV"}
         if self.config["richpresence.gamemode"] is True:
