@@ -1,4 +1,4 @@
 pypresence==3.3.2
 PySimpleGUIQt==0.31.0
 pywin32==227
-PyYAML==5.3
+PyYAML==5.4
