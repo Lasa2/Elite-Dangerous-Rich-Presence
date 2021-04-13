@@ -1,0 +1,18 @@
+elite_dangerous:
+  arguments: ''
+  auto_launch: false
+  delay: ''
+  path: ''
+general:
+  auto_tray: true
+  journal_path: test
+rich_presence:
+  cmdr: true
+  gamemode: false
+  location: true
+  multicrew_mode: true
+  multicrew_size: false
+  power: false
+  ship_icon: false
+  ship_text: true
+  time_elapsed: true

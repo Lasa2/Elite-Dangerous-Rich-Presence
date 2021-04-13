@@ -63,7 +63,8 @@ def loadConfig(file, config={}):
                     config[entry] = False
                 try:
                     var = re.search("%(.+?)%", config[entry]).group(1)
-                    config[entry] = config[entry].replace("%" + var + "%", os.environ[var])
+                    config[entry] = config[entry].replace(
+                        "%" + var + "%", os.environ[var])
                 except AttributeError:
                     logger.debug("AttributeError with " + str(config[entry]))
                 except TypeError:
@@ -90,7 +91,8 @@ class gui():
         thread = threading.Thread(target=self.background, args=())
         thread.start()
         menu_def = ["BLANK", "Exit"]
-        tray = sg.SystemTray(menu=menu_def, filename='./elite-dangerous-clean.ico', tooltip="Elite Dangerous Rich Presence")
+        tray = sg.SystemTray(menu=menu_def, filename='./elite-dangerous-clean.ico',
+                             tooltip="Elite Dangerous Rich Presence")
         while self.main_thread is True:  # The event loop
             menu_item = tray.Read(timeout=15000)
             if menu_item == 'Exit':
