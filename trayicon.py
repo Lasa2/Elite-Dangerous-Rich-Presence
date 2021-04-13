@@ -9,9 +9,9 @@ import os
 
 class TrayIcon:
     # https://github.com/mhammond/pywin32/blob/master/win32/Demos/win32gui_taskbar.py
-    def __init__(self, name="PythonTaskbarDemo", settings: Callable = None):
+    def __init__(self, op: Callable, name="PythonTaskbarDemo"):
         self.name = name
-        self.settings = settings
+        self.open = op
 
         msg_TaskbarRestart = win32gui.RegisterWindowMessage("TaskbarCreated")
         message_map = {
@@ -114,8 +114,7 @@ class TrayIcon:
     def OnCommand(self, hwnd, msg, wparam, lparam):
         id = win32api.LOWORD(wparam)
         if id == 1023:
-            if self.settings:
-                self.settings(True)
+            self.open()
         elif id == 1024:
             win32gui.DestroyWindow(self.hwnd)
         else:

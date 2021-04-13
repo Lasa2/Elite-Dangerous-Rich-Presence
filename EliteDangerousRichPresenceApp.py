@@ -1,15 +1,13 @@
 from os.path import isfile
+from kivy.clock import Clock
 import yaml
-from trayicon import TrayIcon
+
 from kivy.uix.widget import Widget
 from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import BooleanProperty, DictProperty
 from kivy.app import App
-import win32gui
-import asyncio
+
 from kivy.config import Config
-from multiprocessing import Process, Lock
-from threading import Thread
 
 
 Config.set("graphics", "resizable", False)
@@ -37,9 +35,22 @@ class TextOption(BoxLayout):
 class EliteDangerousRichPresence(Widget):
     settings = DictProperty()
 
-    def __init__(self, **kwargs):
+    def __init__(self, con):
+        from kivy.core.window import Window
+        self.Window = Window
+        self.con = con
+        Clock.schedule_interval(self.check_queue, 0.5)
         self.load_settings()
-        super().__init__(**kwargs)
+        super().__init__()
+
+    def check_queue(self, dt):
+        if self.con.poll():
+            msg = self.con.recv()
+            if msg == "restore":
+                self.Window.minimize()
+                self.Window.restore()
+            elif msg == "closed":
+                App.get_running_app().stop()
 
     def load_settings(self):
         if not isfile("settings.yaml"):
@@ -64,11 +75,16 @@ class EliteDangerousRichPresence(Widget):
                 stream.write(yaml.dump(settings))
             except yaml.YAMLError as e:
                 print(e)
+        self.con.send("changed_settings")
 
 
 class EliteDangerousRichPresenceApp(App):
+    def __init__(self, con):
+        self.con = con
+        super().__init__()
+
     def build(self):
-        return EliteDangerousRichPresence()
+        return EliteDangerousRichPresence(self.con)
 
     @staticmethod
     def rgba(r, g, b, a):
@@ -79,31 +95,8 @@ class EliteDangerousRichPresenceApp(App):
         rgb = tuple((int(hex[1:][i:i + 2], 16) for i in (0, 2, 4)))
         return EliteDangerousRichPresenceApp.rgba(*rgb, 255)
 
+    def on_start(self):
+        pass
 
-class BackgroundApp():
-    open_settings: bool = False
-
-    def set_open_settings(self, bool):
-        self.open_settings = bool
-
-    async def app_func(self):
-        self.tray = TrayIcon(
-            name="Elite Dangerous Rich Presence", settings=self.set_open_settings)
-
-        code = 0
-        while code == 0:
-            code = win32gui.PumpWaitingMessages()
-            if self.open_settings:
-                self.open_settings = False
-                #Process(target=EliteDangerousRichPresenceApp().run()).start()
-                proc = Thread(target=EliteDangerousRichPresenceApp().run())
-                proc.start()
-                print("done")
-
-
-if __name__ == '__main__':
-    asyncio.run(BackgroundApp().app_func())
-    # w = TrayIcon(name="Elite Dangerous Rich Presence")
-    # win32gui.PumpMessages()
-    # edrpc_app = EliteDangerousRichPresenceApp()
-    # edrpc_app.run()
+    def on_stop(self):
+        pass
