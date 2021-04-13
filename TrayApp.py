@@ -7,7 +7,7 @@ import sys
 import os
 
 
-class TrayIcon:
+class TrayApp:
     # https://github.com/mhammond/pywin32/blob/master/win32/Demos/win32gui_taskbar.py
     def __init__(self, op: Callable, name="PythonTaskbarDemo"):
         self.name = name

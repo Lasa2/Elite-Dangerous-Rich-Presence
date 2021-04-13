@@ -13,7 +13,6 @@ from kivy.config import Config
 Config.set("graphics", "resizable", False)
 Config.set("graphics", "height", 600)
 Config.set("graphics", "width", 800)
-#Config.set("kivy", "log_level", "debug")
 
 
 class ToggleOption(BoxLayout):
@@ -32,7 +31,7 @@ class TextOption(BoxLayout):
         return self.input.text
 
 
-class EliteDangerousRichPresence(Widget):
+class Settings(Widget):
     settings = DictProperty()
 
     def __init__(self, con):
@@ -78,13 +77,14 @@ class EliteDangerousRichPresence(Widget):
         self.con.send("changed_settings")
 
 
-class EliteDangerousRichPresenceApp(App):
+class SettingsApp(App):
     def __init__(self, con):
         self.con = con
         super().__init__()
 
     def build(self):
-        return EliteDangerousRichPresence(self.con)
+        self.title = "Elite Dangerous Rich Presence Settings"
+        return Settings(self.con)
 
     @staticmethod
     def rgba(r, g, b, a):
@@ -93,7 +93,7 @@ class EliteDangerousRichPresenceApp(App):
     @staticmethod
     def hex(hex):
         rgb = tuple((int(hex[1:][i:i + 2], 16) for i in (0, 2, 4)))
-        return EliteDangerousRichPresenceApp.rgba(*rgb, 255)
+        return SettingsApp.rgba(*rgb, 255)
 
     def on_start(self):
         pass

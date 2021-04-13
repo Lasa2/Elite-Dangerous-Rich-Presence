@@ -4,15 +4,15 @@ elite_dangerous:
   delay: ''
   path: ''
 general:
-  auto_tray: true
-  journal_path: test
+  auto_tray: false
+  journal_path: ''
 rich_presence:
   cmdr: true
-  gamemode: false
+  gamemode: true
   location: true
   multicrew_mode: true
-  multicrew_size: false
+  multicrew_size: true
   power: false
-  ship_icon: false
-  ship_text: true
+  ship_icon: true
+  ship_text: false
   time_elapsed: true

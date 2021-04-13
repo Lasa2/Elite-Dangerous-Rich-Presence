@@ -1,14 +1,14 @@
 from multiprocessing import Pipe, Process, Queue
-from trayicon import TrayIcon
 
 import win32gui
 import asyncio
 
-from EliteDangerousRichPresenceApp import EliteDangerousRichPresenceApp
+from TrayApp import TrayApp
+from SettingsApp import SettingsApp
 
 
 def open_settings(con):
-    EliteDangerousRichPresenceApp(con).run()
+    SettingsApp(con).run()
     con.send("closed")
 
 
@@ -16,15 +16,15 @@ class BackgroundApp():
     open_settings: bool = False
     q = Queue()
 
-    def open_settings(self):
+    def open_settings_call(self):
         if self.open_settings:
             self.parent_con.send("restore")
         else:
             self.open_settings = True
 
     async def app_func(self):
-        self.tray = TrayIcon(
-            name="Elite Dangerous Rich Presence", settings=self.open_settings)
+        self.tray = TrayApp(self.open_settings_call,
+                            name="Elite Dangerous Rich Presence")
 
         self.parent_con, child_con = Pipe()
         app_settings = Process(target=open_settings, args=(child_con,))
@@ -32,6 +32,7 @@ class BackgroundApp():
         code = 0
         while code == 0:
             code = win32gui.PumpWaitingMessages()
+
             if self.open_settings and not app_settings.is_alive():
                 app_settings.start()
 
