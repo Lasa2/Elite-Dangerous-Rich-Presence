@@ -46,6 +46,8 @@ class JournalFileApp:
     def read_loop(self):
         self.get_journal_file()
         while getLauncher() and not self.stop:
+            self.send_message({"event": "Launcher", "timestamp": time.strftime(
+                "%Y-%m-%dT%H:%M:%SZ", time.gmtime())})
             while self.running and getGame():
                 self.send_message({"event": "GameStarted", "timestamp": time.strftime(
                     "%Y-%m-%dT%H:%M:%SZ", time.gmtime())})
