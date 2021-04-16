@@ -8,3 +8,4 @@ wiki/
 Assets/
 env/
 .venv/
+settings.yaml
