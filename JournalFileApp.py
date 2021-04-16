@@ -30,6 +30,7 @@ class JournalFileApp:
     running = True
     new_file = False
     stop = False
+    last_msg = dict()
 
     def __init__(self, con, journalpath) -> None:
         self.con = con
@@ -46,8 +47,9 @@ class JournalFileApp:
     def read_loop(self):
         self.get_journal_file()
         while getLauncher() and not self.stop:
-            self.send_message({"event": "Launcher", "timestamp": time.strftime(
-                "%Y-%m-%dT%H:%M:%SZ", time.gmtime())})
+            if self.last_msg.get("event", None) != "Launcher":
+                self.send_message({"event": "Launcher", "timestamp": time.strftime(
+                    "%Y-%m-%dT%H:%M:%SZ", time.gmtime())})
             while self.running and getGame():
                 self.send_message({"event": "GameStarted", "timestamp": time.strftime(
                     "%Y-%m-%dT%H:%M:%SZ", time.gmtime())})
@@ -104,6 +106,7 @@ class JournalFileApp:
 
     def send_message(self, msg: Dict):
         self.con.send(msg)
+        self.last_msg = msg
 
 
 if __name__ == "__main__":

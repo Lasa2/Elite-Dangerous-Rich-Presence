@@ -79,6 +79,11 @@ class EventProcessing():
         ev = e["event"]
         if ev == "GameShutdown":
             return False
+        elif ev == "Launcher":
+            self.location = "Launcher"
+            self.ship = "elite-dangerous-logo-2018"
+            self.time_elapsed = time.strptime(
+                e["timestamp"], "%Y-%m-%dT%H:%M:%SZ")
         elif ev == "GameStarted":
             self.time_elapsed = time.strptime(
                 e["timestamp"], "%Y-%m-%dT%H:%M:%SZ")
