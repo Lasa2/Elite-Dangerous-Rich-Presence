@@ -84,11 +84,13 @@ class EventProcessing():
             self.ship = "elite-dangerous-logo-2018"
             self.time_elapsed = time.strptime(
                 e["timestamp"], "%Y-%m-%dT%H:%M:%SZ")
-        elif ev == "GameStarted":
+            self.game_mode = None
+        elif ev == "GameStarted" or ev == "Music" and e["MusicTrack"] == "MainMenu":
             self.time_elapsed = time.strptime(
                 e["timestamp"], "%Y-%m-%dT%H:%M:%SZ")
             self.location = "Mainmenu"
             self.ship = "elite-dangerous-logo-2018"
+            self.game_mode = None
         elif ev == "LoadGame":
             self.cmdr = e["Commander"]
             self.game_mode = e["GameMode"]
@@ -147,6 +149,7 @@ class EventProcessing():
                 self.location, "- Landed", "- Normal Space")
         elif ev == "Loadout":
             self.ship == e["Ship"].lower()
+
         return True
 
     def rpc(self, conf):

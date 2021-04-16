@@ -50,9 +50,13 @@ class JournalFileApp:
             if self.last_msg.get("event", None) != "Launcher":
                 self.send_message({"event": "Launcher", "timestamp": time.strftime(
                     "%Y-%m-%dT%H:%M:%SZ", time.gmtime())})
+            self.new_file = False
             while self.running and getGame():
-                self.send_message({"event": "GameStarted", "timestamp": time.strftime(
-                    "%Y-%m-%dT%H:%M:%SZ", time.gmtime())})
+                if not self.new_file:
+                    self.send_message({"event": "GameStarted", "timestamp": time.strftime(
+                        "%Y-%m-%dT%H:%M:%SZ", time.gmtime())})
+                    time.sleep(10)
+                self.new_file = False
                 handle = win32file.CreateFile(
                     self.active_file[1].path,
                     win32file.GENERIC_READ,
@@ -88,7 +92,6 @@ class JournalFileApp:
                         self.recv_messages()
 
                 self.get_journal_file()
-                self.new_file = False
             self.running = True
             time.sleep(1)
             self.recv_messages()
