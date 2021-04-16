@@ -91,7 +91,7 @@ class EventProcessing():
             self.location = "Mainmenu"
             self.ship = "elite-dangerous-logo-2018"
             self.game_mode = None
-        elif ev == "LoadGame":
+        elif ev == "LoadGame" and e.get("GameMode", None):
             self.cmdr = e["Commander"]
             self.game_mode = e["GameMode"]
             self.ship = e["Ship"].lower()
@@ -149,6 +149,8 @@ class EventProcessing():
                 self.location, "- Landed", "- Normal Space")
         elif ev == "Loadout":
             self.ship == e["Ship"].lower()
+        elif ev == "Music" and e["MusicTrack"] == "CQCMenu":
+            self.location = "CQC"
 
         return True
 
