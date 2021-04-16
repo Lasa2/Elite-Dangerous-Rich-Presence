@@ -1,0 +1,154 @@
+#:kivy 2.0.0
+<ToggleOption>:
+    orientation: "horizontal"
+    name: lable_text
+    text: "ToggleOption"
+    state: True
+    Label:
+        size_hint: .2, 1
+        id: lable_text
+        text: root.text
+
+    ToggleButton:
+        size_hint: .4, 1
+        text: "ON"
+        group: root.name.text
+        state: "down" if root.state else "normal"
+        on_press: root.toggle_state()
+
+    ToggleButton:
+        size_hint: .4, 1
+        text: "OFF"
+        group: root.name.text
+        state: "normal" if root.state else "down"
+        on_press: root.toggle_state()
+
+<TextOption>:
+    orientation: "horizontal"
+    name: lable_text
+    text: "TextOption"
+    input_hint: ""
+    input_text: ""
+    input: input
+    Label:
+        size_hint: .2, 1
+        id: lable_text
+        text: root.text
+
+    TextInput:
+        id: input
+        size_hint: .8, 1
+        multiline: False
+        hint_text: root.input_hint
+        text: root.input_text
+
+<BackgroundColor@Widget>:
+    background_color: 1, 1, 1, 1
+    canvas.before:
+        Color:
+            rgba: root.background_color
+        Rectangle:
+            size: self.size
+            pos: self.pos
+
+<BackgroundLabel@Label+BackgroundColor>:
+    background_color: 0, 0, 0, 0
+
+<Settings>:
+    BoxLayout:
+        orientation: "vertical"
+        pos: 0, root.top - self.height
+        size: root.width, root.height
+
+        BackgroundLabel:
+            background_color: app.hex("#ff7100")
+            text: "General"
+
+        ToggleOption:
+            id: general.auto_tray
+            text: "Autostart to Tray"
+            state: root.settings["general"]["auto_tray"]
+
+        TextOption:
+            id: general.journal_path
+            text: "Journal Path"
+            input_hint: "%USERPROFILE%/Saved Games/Frontier Developments/Elite Dangerous"
+            input_text: root.settings["general"]["journal_path"]
+
+        BackgroundLabel:
+            background_color: app.hex("#ff7100")
+            text: "Rich Presence"
+
+        ToggleOption:
+            id: rich_presence.cmdr
+            text: "CMDR"
+            state: root.settings["rich_presence"]["cmdr"]
+
+        ToggleOption:
+            id: rich_presence.power
+            text: "Power"
+            state: root.settings["rich_presence"]["power"]
+
+        ToggleOption:
+            id: rich_presence.location
+            text: "Location"
+            state: root.settings["rich_presence"]["location"]
+
+        ToggleOption:
+            id: rich_presence.gamemode
+            text: "Gamemode"
+            state: root.settings["rich_presence"]["gamemode"]
+
+        ToggleOption:
+            id: rich_presence.multicrew_mode
+            text: "Multicrew Mode"
+            state: root.settings["rich_presence"]["multicrew_mode"]
+
+        ToggleOption:
+            id: rich_presence.multicrew_size
+            text: "Multicrew Size"
+            state: root.settings["rich_presence"]["multicrew_size"]
+
+        ToggleOption:
+            id: rich_presence.time_elapsed
+            text: "Time Elapsed"
+            state: root.settings["rich_presence"]["time_elapsed"]
+
+        ToggleOption:
+            id: rich_presence.ship_icon
+            text: "Ship Icon"
+            state: root.settings["rich_presence"]["ship_icon"]
+
+        ToggleOption:
+            id: rich_presence.ship_text
+            text: "Ship Text"
+            state: root.settings["rich_presence"]["ship_text"]
+
+        BackgroundLabel:
+            background_color: app.hex("#ff7100")
+            text: "Elite Dangerous"
+
+        TextOption:
+            id: elite_dangerous.path
+            text: "Elite Dangerous Path"
+            input_hint: "e.g. C:/Program Files (x86)/Steam/steamapps/common/Elite Dangerous/EDLaunch.exe"
+            input_text: root.settings["elite_dangerous"]["path"]
+
+        TextOption:
+            id: elite_dangerous.arguments
+            text: "Arguments"
+            input_text: root.settings["elite_dangerous"]["arguments"]
+
+        ToggleOption:
+            id: elite_dangerous.auto_launch
+            text: "Auto Launch Game"
+            state: root.settings["elite_dangerous"]["auto_launch"]
+
+        TextOption:
+            id: elite_dangerous.delay
+            text: "Delay"
+            input_text: root.settings["elite_dangerous"]["delay"]
+
+        Button:
+            text: "Save Options"
+            on_press: root.save_settings()

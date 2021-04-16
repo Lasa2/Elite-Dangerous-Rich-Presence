@@ -1,4 +1,9 @@
-pypresence==3.3.2
-PySimpleGUIQt==0.31.0
-pywin32==227
-PyYAML==5.3
+chardet==4.0.0
+Kivy==2.0.0
+kivy-deps.angle==0.3.0
+kivy-deps.glew==0.3.0
+kivy-deps.sdl2==0.3.1
+pypiwin32==223
+pypresence==4.2.0
+pywin32==300
+PyYAML==5.4.1
