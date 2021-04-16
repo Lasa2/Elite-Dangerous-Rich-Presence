@@ -1,4 +1,5 @@
-from os.path import isfile
+import os
+import re
 from kivy.clock import Clock
 import yaml
 
@@ -52,17 +53,28 @@ class Settings(Widget):
                 App.get_running_app().stop()
 
     def load_settings(self):
-        if not isfile("settings.yaml"):
-            with open("settings.yaml", "w") as stream:
-                stream.write("")
         with open("settings.yaml", "r") as stream:
             try:
                 data = yaml.safe_load(stream)
-                self.settings = data if data is not None else dict()
+                self.settings = data
             except yaml.YAMLError as e:
                 print(e)
 
+    def convert_paths(self):
+        item = self.ids["elite_dangerous.path"].input_text
+        var = re.search("%(.+?)%", item)
+        if var is not None:
+            self.ids["elite_dangerous.path"].input_text = item.replace(
+                f"%{var.group(1)}%", os.environ[var.group(1)])
+
+        item = self.ids["general.journal_path"].input_text
+        var = re.search("%(.+?)%", item)
+        if var is not None:
+            self.ids["general.journal_path"].input_text = item.replace(
+                f"%{var.group(1)}%", os.environ[var.group(1)])
+
     def save_settings(self):
+        self.convert_paths()
         settings = dict()
         for entry in self.ids:
             cat, sett = entry.split(".")
@@ -86,11 +98,11 @@ class SettingsApp(App):
         self.title = "Elite Dangerous Rich Presence Settings"
         return Settings(self.con)
 
-    @staticmethod
+    @ staticmethod
     def rgba(r, g, b, a):
         return r / 255.0, g / 255.0, b / 255.0, a / 255.0
 
-    @staticmethod
+    @ staticmethod
     def hex(hex):
         rgb = tuple((int(hex[1:][i:i + 2], 16) for i in (0, 2, 4)))
         return SettingsApp.rgba(*rgb, 255)

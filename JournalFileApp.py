@@ -3,14 +3,28 @@ import json
 import os
 import re
 from typing import Dict, Tuple
-import win32gui
 import win32file
+import win32gui
 import msvcrt
 from queue import Queue
-import asyncio
+import time
 
 
 JOURNALPATH = r"C:\Users\Lasa2\Saved Games\Frontier Developments\Elite Dangerous"
+
+
+def getLauncher():
+    if win32gui.FindWindow(None, "Elite Dangerous Launcher"):
+        return True
+    else:
+        return False
+
+
+def getGame():
+    if win32gui.FindWindow(None, "Elite - Dangerous (CLIENT)"):
+        return True
+    else:
+        return False
 
 
 class JournalFileApp:
@@ -18,77 +32,77 @@ class JournalFileApp:
     queue = Queue()
     running = True
     new_file = False
+    stop = False
 
-    def __init__(self) -> None:
-        pass
-
-    async def run(self):
-        eval_events = asyncio.create_task(self.eval_events())
-        await eval_events
-
-        while self.getGame():
-            self.get_journal_file()
-            read_events = asyncio.create_task(self.read_events())
-            await read_events
+    def __init__(self, con, journalpath) -> None:
+        self.con = con
+        self.journalpath = journalpath
 
     def get_journal_file(self):
-        with os.scandir(JOURNALPATH) as it:
+        with os.scandir(self.journalpath) as it:
             for entry in it:
                 if entry.is_file() and "Journal" in entry.name and ".log" in entry.name:
                     date = int(re.sub(r"[a-zA-Z.]", "", entry.name))
                     if date > self.active_file[0]:
                         self.active_file = (date, entry)
 
-    async def read_events(self):
-        handle = win32file.CreateFile(
-            self.active_file[1].path,
-            win32file.GENERIC_READ,
-            win32file.FILE_SHARE_DELETE | win32file.FILE_SHARE_READ | win32file.FILE_SHARE_WRITE,
-            None,
-            win32file.OPEN_EXISTING,
-            0,
-            None
-        )
-        detached_handle = handle.Detach()
-        file_descriptor = msvcrt.open_osfhandle(
-            detached_handle, os.O_RDONLY)
+    def read_loop(self):
+        self.get_journal_file()
+        while getLauncher() and not self.stop:
+            while self.running and getGame():
+                self.send_message({"event": "GameStarted", "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())})
+                handle = win32file.CreateFile(
+                    self.active_file[1].path,
+                    win32file.GENERIC_READ,
+                    win32file.FILE_SHARE_DELETE | win32file.FILE_SHARE_READ | win32file.FILE_SHARE_WRITE,
+                    None,
+                    win32file.OPEN_EXISTING,
+                    0,
+                    None
+                )
+                detached_handle = handle.Detach()
+                file_descriptor = msvcrt.open_osfhandle(
+                    detached_handle, os.O_RDONLY)
 
-        with open(file_descriptor, encoding="utf-8") as journal:
-            print(f"Reading {self.active_file[1]}")
-            while self.running and not self.new_file:
-                line = journal.readline()
-                if line == "":
-                    await asyncio.sleep(0.1)
-                else:
-                    self.queue.put(json.loads(line))
+                with open(file_descriptor, encoding="utf-8") as journal:
+                    print(f"Reading {self.active_file[1]}")
+                    while not self.new_file:
+                        line = journal.readline()
+                        if line == "":
+                            time.sleep(0.1)
+                        else:
+                            event = json.loads(line)
+                            ev = event["event"]
+                            if ev == "Shutdown":
+                                self.new_file = True
+                                self.running = False
+                            elif ev == "Continued":
+                                self.new_file = True
+                            self.send_message(event)
 
-    async def eval_events(self):
-        while self.running:
-            if not self.queue.empty():
-                event = self.queue.get()
-                ev = event["event"]
-                if ev == "Shutdown":
-                    self.running = False
-                elif ev == "Continued":
-                    self.new_file = True
-            else:
-                await asyncio.sleep(0.1)
+                        if self.stop:
+                            return
 
-    def getLauncher(self):
-        if win32gui.FindWindow(None, "Elite Dangerous Launcher"):
-            return True
-        else:
-            return False
+                        self.recv_messages()
 
-    def getGame(self):
-        if win32gui.FindWindow(None, "Elite - Dangerous (CLIENT)"):
-            return True
-        else:
-            return False
+                self.get_journal_file()
+                self.new_file = False
+            self.running = True
+            time.sleep(1)
+            self.recv_messages()
+
+            if self.stop:
+                return
+
+    def recv_messages(self):
+        if self.con.poll():
+            msg = self.con.recv()
+            if msg == "closed":
+                self.stop = True
+
+    def send_message(self, msg: Dict):
+        self.con.send(msg)
 
 
 if __name__ == "__main__":
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    loop.run_until_complete(JournalFileApp().run())
-    # asyncio.run(JournalFileApp().run())
+    JournalFileApp()

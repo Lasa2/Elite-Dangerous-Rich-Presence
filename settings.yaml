@@ -4,15 +4,15 @@ elite_dangerous:
   delay: ''
   path: ''
 general:
-  auto_tray: false
-  journal_path: ''
+  auto_tray: true
+  journal_path: C:\Users\Lasa2\Saved Games\Frontier Developments\Elite Dangerous
 rich_presence:
   cmdr: true
   gamemode: true
   location: true
   multicrew_mode: true
   multicrew_size: true
-  power: false
+  power: true
   ship_icon: true
   ship_text: false
   time_elapsed: true

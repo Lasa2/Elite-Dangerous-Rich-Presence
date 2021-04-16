@@ -67,13 +67,13 @@
         ToggleOption:
             id: general.auto_tray
             text: "Autostart to Tray"
-            state: root.settings.get("general", dict()).get("auto_tray", True)
+            state: root.settings["general"]["auto_tray"]
 
         TextOption:
             id: general.journal_path
             text: "Journal Path"
             input_hint: "%USERPROFILE%/Saved Games/Frontier Developments/Elite Dangerous"
-            input_text: root.settings.get("general", dict()).get("journal_path", "")
+            input_text: root.settings["general"]["journal_path"]
 
         BackgroundLabel:
             background_color: app.hex("#ff7100")
@@ -82,47 +82,47 @@
         ToggleOption:
             id: rich_presence.cmdr
             text: "CMDR"
-            state: root.settings.get("rich_presence", dict()).get("cmdr", True)
+            state: root.settings["rich_presence"]["cmdr"]
 
         ToggleOption:
             id: rich_presence.power
             text: "Power"
-            state: root.settings.get("rich_presence", dict()).get("power", True)
+            state: root.settings["rich_presence"]["power"]
 
         ToggleOption:
             id: rich_presence.location
             text: "Location"
-            state: root.settings.get("rich_presence", dict()).get("location", True)
+            state: root.settings["rich_presence"]["location"]
 
         ToggleOption:
             id: rich_presence.gamemode
             text: "Gamemode"
-            state: root.settings.get("rich_presence", dict()).get("gamemode", True)
+            state: root.settings["rich_presence"]["gamemode"]
 
         ToggleOption:
             id: rich_presence.multicrew_mode
             text: "Multicrew Mode"
-            state: root.settings.get("rich_presence", dict()).get("multicrew_mode", True)
+            state: root.settings["rich_presence"]["multicrew_mode"]
 
         ToggleOption:
             id: rich_presence.multicrew_size
             text: "Multicrew Size"
-            state: root.settings.get("rich_presence", dict()).get("multicrew_size", True)
+            state: root.settings["rich_presence"]["multicrew_size"]
 
         ToggleOption:
             id: rich_presence.time_elapsed
             text: "Time Elapsed"
-            state: root.settings.get("rich_presence", dict()).get("time_elapsed", True)
+            state: root.settings["rich_presence"]["time_elapsed"]
 
         ToggleOption:
             id: rich_presence.ship_icon
             text: "Ship Icon"
-            state: root.settings.get("rich_presence", dict()).get("ship_icon", True)
+            state: root.settings["rich_presence"]["ship_icon"]
 
         ToggleOption:
             id: rich_presence.ship_text
             text: "Ship Text"
-            state: root.settings.get("rich_presence", dict()).get("ship_text", True)
+            state: root.settings["rich_presence"]["ship_text"]
 
         BackgroundLabel:
             background_color: app.hex("#ff7100")
@@ -132,22 +132,22 @@
             id: elite_dangerous.path
             text: "Elite Dangerous Path"
             input_hint: "e.g. C:/Program Files (x86)/Steam/steamapps/common/Elite Dangerous/EDLaunch.exe"
-            input_text: root.settings.get("elite_dangerous", dict()).get("path", "")
+            input_text: root.settings["elite_dangerous"]["path"]
 
         TextOption:
             id: elite_dangerous.arguments
             text: "Arguments"
-            input_text: root.settings.get("elite_dangerous", dict()).get("arguments", "")
+            input_text: root.settings["elite_dangerous"]["arguments"]
 
         ToggleOption:
             id: elite_dangerous.auto_launch
             text: "Auto Launch Game"
-            state: root.settings.get("elite_dangerous", dict()).get("auto_launch", False)
+            state: root.settings["elite_dangerous"]["auto_launch"]
 
         TextOption:
             id: elite_dangerous.delay
             text: "Delay"
-            input_text: root.settings.get("elite_dangerous", dict()).get("delay", "")
+            input_text: root.settings["elite_dangerous"]["delay"]
 
         Button:
             text: "Save Options"

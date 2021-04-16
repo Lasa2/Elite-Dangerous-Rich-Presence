@@ -65,6 +65,7 @@ class watch():
                 if entry.is_file() and "Journal" in entry.name and ".log" in entry.name:
                     new = str.replace(entry.name, "Journal.", "")
                     new = str.replace(new, "JournalBeta.", "")
+                    new = str.replace(new, "JournalAlpha.", "")
                     new = str.replace(new, ".log", "")
                     if float(new) > float(self.active_file[0]):
                         self.active_file = (float(new), entry.name)
@@ -82,7 +83,8 @@ class watch():
             return False
 
     async def readJournal(self):
-        journal = os.path.join(self.config["path.journaldir"], self.active_file[1])
+        journal = os.path.join(
+            self.config["path.journaldir"], self.active_file[1])
         handle = win32file.CreateFile(
             journal,
             win32file.GENERIC_READ,
@@ -135,37 +137,52 @@ class watch():
         elif entry["event"] == "Location":
             if "Body" in entry:
                 if entry["BodyType"] == "Station":
-                    self.discordRichPresence["Location"] = entry["StarSystem"] + " @ " + entry["Body"]
+                    self.discordRichPresence["Location"] = entry["StarSystem"] + \
+                        " @ " + entry["Body"]
                 else:
-                    self.discordRichPresence["Location"] = entry["Body"] + " - Normal Space"
+                    self.discordRichPresence["Location"] = entry["Body"] + \
+                        " - Normal Space"
             else:
-                self.discordRichPresence["Location"] = entry["StarSystem"] + " - Normal Space"
+                self.discordRichPresence["Location"] = entry["StarSystem"] + \
+                    " - Normal Space"
         elif entry["event"] == "Powerplay":
             self.discordRichPresence["Power"] = entry["Power"]
         if entry["event"] == "ApproachBody":
-            self.discordRichPresence["Location"] = entry["Body"] + " - Supercruise"
+            self.discordRichPresence["Location"] = entry["Body"] + \
+                " - Supercruise"
         elif entry["event"] == "Docked":
-            self.discordRichPresence["Location"] = entry["StarSystem"] + " @ " + entry["StationName"] + "(" + str(int(entry["DistFromStarLS"])) + " ls)"
+            self.discordRichPresence["Location"] = entry["StarSystem"] + " @ " + \
+                entry["StationName"] + \
+                "(" + str(int(entry["DistFromStarLS"])) + " ls)"
         elif entry["event"] == "LeaveBody":
-            self.discordRichPresence["Location"] = entry["StarSystem"] + " - Supercruise"
+            self.discordRichPresence["Location"] = entry["StarSystem"] + \
+                " - Supercruise"
         elif entry["event"] == "SupercruiseEntry":
-            self.discordRichPresence["Location"] = entry["StarSystem"] + " - Supercruise"
+            self.discordRichPresence["Location"] = entry["StarSystem"] + \
+                " - Supercruise"
         elif entry["event"] == "SupercruiseExit":
             if "Body" in entry:
                 if entry["BodyType"] == "Station":
-                    self.discordRichPresence["Location"] = entry["StarSystem"] + " @ " + entry["Body"]
+                    self.discordRichPresence["Location"] = entry["StarSystem"] + \
+                        " @ " + entry["Body"]
                 else:
-                    self.discordRichPresence["Location"] = entry["Body"] + " - Normal Space"
+                    self.discordRichPresence["Location"] = entry["Body"] + \
+                        " - Normal Space"
             else:
-                self.discordRichPresence["Location"] = entry["StarSystem"] + " - Normal Space"
+                self.discordRichPresence["Location"] = entry["StarSystem"] + \
+                    " - Normal Space"
         elif entry["event"] == "Outfitting":
-            self.discordRichPresence["Location"] = entry["StarSystem"] + " @ " + entry["StationName"] + " outfitting ship"
+            self.discordRichPresence["Location"] = entry["StarSystem"] + \
+                " @ " + entry["StationName"] + " outfitting ship"
         elif entry["event"] == "Shipyard":
-            self.discordRichPresence["Location"] = entry["StarSystem"] + " @ " + entry["StationName"] + " in the Shipyard"
+            self.discordRichPresence["Location"] = entry["StarSystem"] + \
+                " @ " + entry["StationName"] + " in the Shipyard"
         elif entry["event"] == "ShipyardNew":
-            self.discordRichPresence["LargeImageKey"] = entry["ShipType"].lower()
+            self.discordRichPresence["LargeImageKey"] = entry["ShipType"].lower(
+            )
         elif entry["event"] == "ShipyardSwap":
-            self.discordRichPresence["LargeImageKey"] = entry["ShipType"].lower()
+            self.discordRichPresence["LargeImageKey"] = entry["ShipType"].lower(
+            )
         elif entry["event"] == "PowerplayDefect":
             self.discordRichPresence["Power"] = entry["ToPower"]
         elif entry["event"] == "PowerplayJoin":
@@ -206,15 +223,19 @@ class watch():
             self.discordRichPresence["MultiplayerType"] = None
             self.discordRichPresence["MultiplayerText"] = None
         elif entry["event"] == "FSDJump":
-            self.discordRichPresence["Location"] = entry["StarSystem"] + " - Supercruise"
+            self.discordRichPresence["Location"] = entry["StarSystem"] + \
+                " - Supercruise"
         elif entry["event"] == "Touchdown":
-            self.discordRichPresence["Location"] = str.replace(self.discordRichPresence["Location"], " - Normal Space", " - Landed")
+            self.discordRichPresence["Location"] = str.replace(
+                self.discordRichPresence["Location"], " - Normal Space", " - Landed")
         elif entry["event"] == "LaunchSRV":
             self.discordRichPresence["LargeImageKey"] = "testbuggy"
         elif entry["event"] == "Liftoff":
-            str.replace(self.discordRichPresence["Location"], " - Landed", " - Normal Space")
+            str.replace(
+                self.discordRichPresence["Location"], " - Landed", " - Normal Space")
         elif entry["event"] == "ApproachSettlement":
-            self.discordRichPresence["Location"] = str.replace(self.discordRichPresence["Location"], " - Normal Space", " @ " + entry["Name"])
+            self.discordRichPresence["Location"] = str.replace(
+                self.discordRichPresence["Location"], " - Normal Space", " @ " + entry["Name"])
         elif entry["event"] == "Loadout":
             self.discordRichPresence["LargeImageKey"] = entry["Ship"].lower()
 
@@ -272,9 +293,11 @@ class watch():
         if self.config["richpresence.cmdr"] is True and self.discordRichPresence["CMDR"] is not None:
             rlarge_text = "CMDR " + self.discordRichPresence["CMDR"]
         if self.config["richpresence.shiptext"] is True and self.discordRichPresence["LargeImageKey"] in shipnames:
-            rlarge_text = rlarge_text + " | " + shipnames[self.discordRichPresence["LargeImageKey"]]
+            rlarge_text = rlarge_text + " | " + \
+                shipnames[self.discordRichPresence["LargeImageKey"]]
         if self.discordRichPresence["Power"] is not None and self.config["richpresence.power"] is True:
-            rlarge_text = rlarge_text + " | " + self.discordRichPresence["Power"]
+            rlarge_text = rlarge_text + " | " + \
+                self.discordRichPresence["Power"]
         if self.config["richpresence.timeelapsed"] is True:
             rstart = self.discordRichPresence["StartTime"]
         if self.config["richpresence.location"] is True:
