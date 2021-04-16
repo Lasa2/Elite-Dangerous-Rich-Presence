@@ -1,18 +1,17 @@
-from collections import namedtuple
-from multiprocessing import Pipe, Process
-import subprocess
-from typing import Dict
 import calendar
+import os
+import subprocess
+import time
+from multiprocessing import Pipe, Process
+from typing import Dict
 
 import win32gui
-
-from TrayApp import TrayApp
-from SettingsApp import SettingsApp
-from JournalFileApp import JournalFileApp
-import os
 import yaml
-import time
 from pypresence import Presence
+
+from JournalFileApp import JournalFileApp
+from SettingsApp import SettingsApp
+from TrayApp import TrayApp
 
 JOURNALPATH = r"C:\Users\Lasa2\Saved Games\Frontier Developments\Elite Dangerous"
 

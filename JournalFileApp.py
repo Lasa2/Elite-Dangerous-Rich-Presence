@@ -1,14 +1,13 @@
-from __future__ import annotations
 import json
+import msvcrt
 import os
 import re
+import time
+from queue import Queue
 from typing import Dict, Tuple
+
 import win32file
 import win32gui
-import msvcrt
-from queue import Queue
-import time
-
 
 JOURNALPATH = r"C:\Users\Lasa2\Saved Games\Frontier Developments\Elite Dangerous"
 
@@ -50,7 +49,8 @@ class JournalFileApp:
         self.get_journal_file()
         while getLauncher() and not self.stop:
             while self.running and getGame():
-                self.send_message({"event": "GameStarted", "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())})
+                self.send_message({"event": "GameStarted", "timestamp": time.strftime(
+                    "%Y-%m-%dT%H:%M:%SZ", time.gmtime())})
                 handle = win32file.CreateFile(
                     self.active_file[1].path,
                     win32file.GENERIC_READ,

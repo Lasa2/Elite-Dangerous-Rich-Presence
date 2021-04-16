@@ -1,10 +1,11 @@
-from typing import Callable
-import win32api
-import win32gui
-import win32con
-import winerror
-import sys
 import os
+import sys
+from typing import Callable
+
+import win32api
+import win32con
+import win32gui
+import winerror
 
 
 class TrayApp:
