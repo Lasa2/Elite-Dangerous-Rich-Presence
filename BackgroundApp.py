@@ -1,4 +1,5 @@
 import calendar
+import multiprocessing
 import os
 import subprocess
 import time
@@ -76,8 +77,9 @@ class EventProcessing():
 
     def ev(self, e):
         ev = e["event"]
-
-        if ev == "GameStarted":
+        if ev == "GameShutdown":
+            return False
+        elif ev == "GameStarted":
             self.time_elapsed = time.strptime(
                 e["timestamp"], "%Y-%m-%dT%H:%M:%SZ")
             self.location = "Mainmenu"
@@ -140,6 +142,7 @@ class EventProcessing():
                 self.location, "- Landed", "- Normal Space")
         elif ev == "Loadout":
             self.ship == e["Ship"].lower()
+        return True
 
     def rpc(self, conf):
         state = None
@@ -160,7 +163,7 @@ class EventProcessing():
         if conf["power"] and self.power:
             large_text += f" | {self.power}"
         if conf["time_elapsed"] and self.time_elapsed:
-            start = self.time_elapsed
+            start = str(calendar.timegm(self.time_elapsed))
         if conf["location"] and self.location:
             details = self.location
         if conf["ship_icon"] and self.ship:
@@ -168,7 +171,7 @@ class EventProcessing():
         if conf["multicrew_size"] and self.multicrew_size:
             party_size = self.multicrew_size
 
-        return state, details, str(calendar.timegm(start)), large_text, large_image, party_size
+        return state, details, start, large_text, large_image, party_size
 
 
 class BackgroundApp():
@@ -214,14 +217,16 @@ class BackgroundApp():
                 self.config = data
             except yaml.YAMLError as e:
                 print(e)
-        print(self.config)
 
     def event_processing(self, event):
-        self.ev.ev(event)
+        game = self.ev.ev(event)
+        if not game:
+            return game
         state, details, start, large_text, large_image, party_size = self.ev.rpc(
             self.config["rich_presence"])
         self.rpc.update(state=state, details=details, start=start,
                         large_text=large_text, large_image=large_image, party_size=party_size)
+        return game
 
     def open_settings_call(self):
         if self.open_settings:
@@ -231,7 +236,7 @@ class BackgroundApp():
 
     def run(self):
         TrayApp(self.open_settings_call,
-                name="Elite Dangerous Rich Presence")
+                name="Elite Dangerous Rich Presence", icon="elite-dangerous-clean.ico")
 
         self.rpc = Presence(535809971867222036)
         self.rpc.connect()
@@ -259,7 +264,8 @@ class BackgroundApp():
             app_settings.start()
 
         code = 0
-        while code == 0:
+        game = True
+        while code == 0 and game:
             code = win32gui.PumpWaitingMessages()
 
             if self.open_settings and not app_settings.is_alive():
@@ -276,7 +282,7 @@ class BackgroundApp():
 
             if journal_parent_con.poll():
                 msg = journal_parent_con.recv()
-                self.event_processing(msg)
+                game = self.event_processing(msg)
 
             time.sleep(0.1)
 
@@ -285,4 +291,5 @@ class BackgroundApp():
 
 
 if __name__ == '__main__':
+    multiprocessing.freeze_support()
     BackgroundApp().run()

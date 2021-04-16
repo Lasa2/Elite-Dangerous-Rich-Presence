@@ -10,7 +10,7 @@ import winerror
 
 class TrayApp:
     # https://github.com/mhammond/pywin32/blob/master/win32/Demos/win32gui_taskbar.py
-    def __init__(self, op: Callable, name="PythonTaskbarDemo"):
+    def __init__(self, op: Callable, name="PythonTaskbarDemo", icon=None):
         self.name = name
         self.open = op
 
@@ -43,13 +43,14 @@ class TrayApp:
                                           0, 0, win32con.CW_USEDEFAULT, win32con.CW_USEDEFAULT,
                                           0, 0, hinst, None)
         win32gui.UpdateWindow(self.hwnd)
-        self._DoCreateIcons()
+        self._DoCreateIcons(iconPathName=icon)
 
-    def _DoCreateIcons(self):
+    def _DoCreateIcons(self, iconPathName=None):
         # Try and find a custom icon
         hinst = win32api.GetModuleHandle(None)
-        iconPathName = os.path.abspath(os.path.join(
-            os.path.split(sys.executable)[0], "pyc.ico"))
+        if not iconPathName:
+            iconPathName = os.path.abspath(os.path.join(
+                os.path.split(sys.executable)[0], "pyc.ico"))
         if not os.path.isfile(iconPathName):
             # Look in DLLs dir, a-la py 2.5
             iconPathName = os.path.abspath(os.path.join(

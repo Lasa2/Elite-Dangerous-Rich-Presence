@@ -91,6 +91,8 @@ class JournalFileApp:
 
             if self.stop:
                 return
+        self.send_message({"event": "GameShutdown", "timestamp": time.strftime(
+            "%Y-%m-%dT%H:%M:%SZ", time.gmtime())})
 
     def recv_messages(self):
         if self.con.poll():
