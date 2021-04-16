@@ -13,8 +13,6 @@ from JournalFileApp import JournalFileApp
 from SettingsApp import SettingsApp
 from TrayApp import TrayApp
 
-JOURNALPATH = r"C:\Users\Lasa2\Saved Games\Frontier Developments\Elite Dangerous"
-
 
 def open_settings(con):
     SettingsApp(con).run()

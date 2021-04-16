@@ -9,8 +9,6 @@ from typing import Dict, Tuple
 import win32file
 import win32gui
 
-JOURNALPATH = r"C:\Users\Lasa2\Saved Games\Frontier Developments\Elite Dangerous"
-
 
 def getLauncher():
     if win32gui.FindWindow(None, "Elite Dangerous Launcher"):
