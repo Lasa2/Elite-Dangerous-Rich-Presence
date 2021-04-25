@@ -144,11 +144,6 @@
             text: "Auto Launch Game"
             state: root.settings["elite_dangerous"]["auto_launch"]
 
-        TextOption:
-            id: elite_dangerous.delay
-            text: "Delay"
-            input_text: root.settings["elite_dangerous"]["delay"]
-
         Button:
             text: "Save Options"
             on_press: root.save_settings()

@@ -10,7 +10,7 @@ import win32gui
 import yaml
 from pypresence import Presence
 
-from JournalFileApp import JournalFileApp
+from JournalFileApp import JournalFileApp, getLauncher
 from SettingsApp import SettingsApp
 from TrayApp import TrayApp
 
@@ -206,7 +206,6 @@ class BackgroundApp():
             "path": "",
             "arguments": "",
             "auto_launch": False,
-            "delay": "",
         }
     }
 
@@ -257,9 +256,10 @@ class BackgroundApp():
                 game = self.config["elite_dangerous"]["path"] + \
                     " " + self.config["elite_dangerous"]["arguments"]
                 subprocess.Popen(game)
-                time.sleep(self.config["elite_dangerous"]["delay"])
-            except Exception as e:
-                self.logger.error(f"Unable to launch Elite Dangerous: {e}")
+                while not getLauncher():
+                    time.sleep(1)
+            except Exception:
+                print("Unable to launch Elite Dangerous")
 
         journal_parent_con, journal_child_con = Pipe()
         journal_app = Process(target=open_journal, args=(
