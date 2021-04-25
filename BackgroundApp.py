@@ -20,11 +20,8 @@ with open("logging.yaml", "r") as stream:
         logging_conf = yaml.safe_load(stream)
     except yaml.YAMLError as e:
         raise e
-
 logging.config.dictConfig(logging_conf)
 logger = logging.getLogger("BackgroundApp")
-
-import SettingsApp  # noqa # nopep8
 
 
 def save_logging_conf(conf):
@@ -32,11 +29,11 @@ def save_logging_conf(conf):
         try:
             stream.write(yaml.dump(conf))
         except yaml.YAMLError as e:
-            logger.exception("Could not write logging.yaml, %s", e)
-            raise e
+            logger.error("Could not write logging.yaml, %s", e)
 
 
 def open_settings(con):
+    import SettingsApp  # noqa # nopep8
     SettingsApp.SettingsApp(con).run()
     con.send("closed")
 
@@ -341,5 +338,8 @@ class BackgroundApp():
 
 
 if __name__ == '__main__':
+    # if os.path.exists("edrp.log"):
+    #     os.remove("edrp.log")
+
     multiprocessing.freeze_support()
     BackgroundApp().run()

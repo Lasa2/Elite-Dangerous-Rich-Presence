@@ -16,10 +16,10 @@ from kivy.uix.widget import Widget  # noqa
 
 logger = logging.getLogger(__name__)
 
-
 Config.set("graphics", "resizable", False)
 Config.set("graphics", "height", 600)
 Config.set("graphics", "width", 800)
+Config.set("kivy", "log_enable", 0)
 
 
 class ToggleOption(BoxLayout):
