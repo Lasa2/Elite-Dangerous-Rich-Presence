@@ -1,3 +1,4 @@
+import logging
 import os
 import sys
 from typing import Callable
@@ -7,10 +8,13 @@ import win32con
 import win32gui
 import winerror
 
+logger = logging.getLogger(__name__)
+
 
 class TrayApp:
     # https://github.com/mhammond/pywin32/blob/master/win32/Demos/win32gui_taskbar.py
     def __init__(self, op: Callable, name="PythonTaskbarDemo", icon=None):
+        logger.debug("Creating Tray Application")
         self.name = name
         self.open = op
 
@@ -85,6 +89,7 @@ class TrayApp:
         nid = (self.hwnd, 0)
         win32gui.Shell_NotifyIcon(win32gui.NIM_DELETE, nid)
         win32gui.PostQuitMessage(0)  # Terminate the app.
+        logger.debug("Closing Tray Application")
 
     def OnTaskbarNotify(self, hwnd, msg, wparam, lparam):
         if lparam == win32con.WM_LBUTTONUP:

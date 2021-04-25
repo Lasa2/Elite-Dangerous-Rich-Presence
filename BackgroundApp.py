@@ -1,4 +1,6 @@
 import calendar
+import logging
+import logging.config
 import multiprocessing
 import os
 import subprocess
@@ -10,18 +12,37 @@ import win32gui
 import yaml
 from pypresence import Presence
 
-from JournalFileApp import JournalFileApp, getLauncher
-from SettingsApp import SettingsApp
-from TrayApp import TrayApp
+import JournalFileApp
+import TrayApp
+
+with open("logging.yaml", "r") as stream:
+    try:
+        logging_conf = yaml.safe_load(stream)
+    except yaml.YAMLError as e:
+        raise e
+
+logging.config.dictConfig(logging_conf)
+logger = logging.getLogger("BackgroundApp")
+
+import SettingsApp  # noqa # nopep8
+
+
+def save_logging_conf(conf):
+    with open("logging.yaml", "w") as stream:
+        try:
+            stream.write(yaml.dump(conf))
+        except yaml.YAMLError as e:
+            logger.exception("Could not write logging.yaml, %s", e)
+            raise e
 
 
 def open_settings(con):
-    SettingsApp(con).run()
+    SettingsApp.SettingsApp(con).run()
     con.send("closed")
 
 
 def open_journal(con, journal_path):
-    JournalFileApp(con, journal_path).read_loop()
+    JournalFileApp.JournalFileApp(con, journal_path).read_loop()
 
 
 class EventProcessing():
@@ -189,7 +210,8 @@ class BackgroundApp():
     config: Dict = {
         "general": {
             "auto_tray": False,
-            "journal_path": os.path.join(os.environ["USERPROFILE"], "Saved Games\\Frontier Developments\\Elite Dangerous")
+            "journal_path": os.path.join(os.environ["USERPROFILE"], "Saved Games\\Frontier Developments\\Elite Dangerous"),
+            "log_level": "WARNING",
         },
         "rich_presence": {
             "cmdr": True,
@@ -210,8 +232,8 @@ class BackgroundApp():
     }
 
     def __init__(self) -> None:
-        self.ev = EventProcessing()
         self.load_config()
+        self.ev = EventProcessing()
 
     def load_config(self):
         if not os.path.isfile("settings.yaml"):
@@ -219,13 +241,16 @@ class BackgroundApp():
                 try:
                     stream.write(yaml.dump(self.config))
                 except yaml.YAMLError as e:
-                    print(e)
+                    logger.exception("Could not write settings.yaml, %s", e)
+                    raise e
         with open("settings.yaml", "r") as stream:
             try:
                 data = yaml.safe_load(stream)
                 self.config = data
             except yaml.YAMLError as e:
-                print(e)
+                logger.exception("Could not load settings.yaml, %s", e)
+                raise e
+        logging_conf["root"]["level"] = self.config["general"]["log_level"]
 
     def event_processing(self, event):
         game = self.ev.ev(event)
@@ -244,41 +269,54 @@ class BackgroundApp():
             self.open_settings = True
 
     def run(self):
-        TrayApp(self.open_settings_call,
-                name="Elite Dangerous Rich Presence", icon="elite-dangerous-clean.ico")
+        TrayApp.TrayApp(self.open_settings_call,
+                        name="Elite Dangerous Rich Presence", icon="elite-dangerous-clean.ico")
 
+        logger.debug("Starting Rich Presence")
         self.rpc = Presence(535809971867222036)
         self.rpc.connect()
 
         # elite dangerous auto launch
         if self.config["elite_dangerous"]["auto_launch"] and os.path.exists(self.config["elite_dangerous"]["path"]):
+            logger.debug("Lauch executable: %s with arguments: %s",
+                         self.config["elite_dangerous"]["path"], self.config["elite_dangerous"]["arguments"])
             try:
                 game = self.config["elite_dangerous"]["path"] + \
                     " " + self.config["elite_dangerous"]["arguments"]
                 subprocess.Popen(game)
-                while not getLauncher():
+                logger.debug(
+                    "Launched executable, now waiting for Elite Launcher")
+                while not JournalFileApp.getLauncher():
+                    logger.debug("Launcher not detected, sleeping 1s")
                     time.sleep(1)
-            except Exception:
-                print("Unable to launch Elite Dangerous")
+                logger.debug("Elite Launcher running, continuing")
+            except Exception as e:
+                logger.error("Unable to launch executable, %s", e)
 
+        logger.debug("Preparing Tray Application")
         journal_parent_con, journal_child_con = Pipe()
         journal_app = Process(target=open_journal, args=(
             journal_child_con, self.config["general"]["journal_path"]))
         journal_app.start()
+        logger.debug("Tray Application stated, continuing")
 
+        logger.debug("Preparing Settings Window")
         self.settings_parent_con, settings_child_con = Pipe()
         app_settings = Process(target=open_settings,
                                args=(settings_child_con,))
 
         if not self.config["general"]["auto_tray"]:
             app_settings.start()
+        logger.debug("Prepared Settings Window")
 
         code = 0
         game = True
+        logger.info("Entering main loop")
         while code == 0 and game:
             code = win32gui.PumpWaitingMessages()
 
             if self.open_settings and not app_settings.is_alive():
+                logger.debug("Opening Settings")
                 app_settings.start()
 
             if self.settings_parent_con.poll():
@@ -288,7 +326,9 @@ class BackgroundApp():
                         target=open_settings, args=(settings_child_con,))
                     self.open_settings = False
                 elif msg == "changed_settings":
+                    logger.debug("Config changed, reloading")
                     self.load_config()
+                    save_logging_conf(logging_conf)
 
             if journal_parent_con.poll():
                 msg = journal_parent_con.recv()

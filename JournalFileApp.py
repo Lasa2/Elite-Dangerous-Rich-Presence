@@ -1,4 +1,5 @@
 import json
+import logging
 import msvcrt
 import os
 import re
@@ -9,18 +10,24 @@ from typing import Dict, Tuple
 import win32file
 import win32gui
 
+logger = logging.getLogger(__name__)
+
 
 def getLauncher():
+    logger.debug("Searching Window: Elite Dangerous Launcher")
     if win32gui.FindWindow(None, "Elite Dangerous Launcher"):
         return True
     else:
+        logger.debug("Elite Dangerous Launcher not found")
         return False
 
 
 def getGame():
+    logger.debug("Searching Window: Elite - Dangerous (CLIENT)")
     if win32gui.FindWindow(None, "Elite - Dangerous (CLIENT)"):
         return True
     else:
+        logger.debug("Elite - Dangerous (CLIENT) not found")
         return False
 
 
@@ -37,6 +44,7 @@ class JournalFileApp:
         self.journalpath = journalpath
 
     def get_journal_file(self):
+        logger.debug("Scanning for newest journal file")
         with os.scandir(self.journalpath) as it:
             for entry in it:
                 if entry.is_file() and "Journal" in entry.name and ".log" in entry.name:
@@ -46,6 +54,7 @@ class JournalFileApp:
 
     def read_loop(self):
         self.get_journal_file()
+        logger.debug("Entering journal loop")
         while getLauncher() and not self.stop:
             if self.last_msg.get("event", None) != "Launcher":
                 self.send_message({"event": "Launcher", "timestamp": time.strftime(
@@ -71,7 +80,7 @@ class JournalFileApp:
                     detached_handle, os.O_RDONLY)
 
                 with open(file_descriptor, encoding="utf-8") as journal:
-                    print(f"Reading {self.active_file[1]}")
+                    logger.info("Reading %s", self.active_file[1])
                     while not self.new_file:
                         line = journal.readline()
                         if line == "":
@@ -105,12 +114,9 @@ class JournalFileApp:
         if self.con.poll():
             msg = self.con.recv()
             if msg == "closed":
+                logger.debug("Main application closed, stopping loop")
                 self.stop = True
 
     def send_message(self, msg: Dict):
         self.con.send(msg)
         self.last_msg = msg
-
-
-if __name__ == "__main__":
-    JournalFileApp()

@@ -23,6 +23,44 @@
         state: "normal" if root.state else "down"
         on_press: root.toggle_state()
 
+<LoggingOption>:
+    orientation: "horizontal"
+    name: lable_text
+    text: "Logging Level"
+    state: "WARNING"
+    Label:
+        size_hint: .2, 1
+        id: lable_text
+        text: root.text
+
+    ToggleButton:
+        size_hint: .2, 1
+        text: "Debug"
+        group: root.name.text
+        state: "down" if root.state == "DEBUG" else "normal"
+        on_press: root.set_state("DEBUG")
+
+    ToggleButton:
+        size_hint: .2, 1
+        text: "Info"
+        group: root.name.text
+        state: "down" if root.state == "INFO" else "normal"
+        on_press: root.set_state("INFO")
+
+    ToggleButton:
+        size_hint: .2, 1
+        text: "Warning"
+        group: root.name.text
+        state: "down" if root.state == "WARNING" else "normal"
+        on_press: root.set_state("WARNING")
+
+    ToggleButton:
+        size_hint: .2, 1
+        text: "Error"
+        group: root.name.text
+        state: "down" if root.state == "ERROR" else "normal"
+        on_press: root.set_state("ERROR")
+
 <TextOption>:
     orientation: "horizontal"
     name: lable_text
@@ -74,6 +112,10 @@
             text: "Journal Path"
             input_hint: "%USERPROFILE%/Saved Games/Frontier Developments/Elite Dangerous"
             input_text: root.settings["general"]["journal_path"]
+
+        LoggingOption:
+            id: general.log_level
+            state: root.settings["general"]["log_level"]
 
         BackgroundLabel:
             background_color: app.hex("#ff7100")
