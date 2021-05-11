@@ -265,16 +265,8 @@ class BackgroundApp():
         else:
             self.open_settings = True
 
-    def run(self):
-        TrayApp.TrayApp(self.open_settings_call,
-                        name="Elite Dangerous Rich Presence", icon="elite-dangerous-clean.ico")
-
-        logger.debug("Starting Rich Presence")
-        self.rpc = Presence(535809971867222036)
-        self.rpc.connect()
-
-        # elite dangerous auto launch
-        if self.config["elite_dangerous"]["auto_launch"] and os.path.exists(self.config["elite_dangerous"]["path"]):
+    def launch_ed(self):
+        if self.config["elite_dangerous"]["path"].endswith(".exe"):
             logger.debug("Lauch executable: %s with arguments: %s",
                          self.config["elite_dangerous"]["path"], self.config["elite_dangerous"]["arguments"])
             try:
@@ -289,6 +281,31 @@ class BackgroundApp():
                 logger.debug("Elite Launcher running, continuing")
             except Exception as e:
                 logger.error("Unable to launch executable, %s", e)
+        else:
+            logger.debug("Lauch: %s without arguments",
+                         self.config["elite_dangerous"]["path"])
+            try:
+                os.system(f'"{self.config["elite_dangerous"]["path"]}"')
+                logger.debug(
+                    "Launched, now waiting for Elite Launcher")
+                while not JournalFileApp.getLauncher():
+                    logger.debug("Launcher not detected, sleeping 1s")
+                    time.sleep(1)
+                logger.debug("Elite Launcher running, continuing")
+            except Exception as e:
+                logger.error("Unable to launch executable, %s", e)
+
+    def run(self):
+        TrayApp.TrayApp(self.open_settings_call,
+                        name="Elite Dangerous Rich Presence", icon="elite-dangerous-clean.ico")
+
+        logger.debug("Starting Rich Presence")
+        self.rpc = Presence(535809971867222036)
+        self.rpc.connect()
+
+        # elite dangerous auto launch
+        if self.config["elite_dangerous"]["auto_launch"] and os.path.exists(self.config["elite_dangerous"]["path"]):
+            self.launch_ed()
 
         logger.debug("Preparing Tray Application")
         journal_parent_con, journal_child_con = Pipe()

@@ -8,12 +8,12 @@ handlers:
     formatter: simple
     stream: ext://sys.stdout
   file:
+    backupCount: 1
     class: logging.handlers.RotatingFileHandler
     filename: edrp.log
     formatter: simple
-    mode: a
-    backupCount: 1
     maxBytes: 1000000
+    mode: a
 loggers:
   simple:
     handlers:
