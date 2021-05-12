@@ -78,6 +78,7 @@ class Settings(Widget):
         Clock.schedule_interval(self.check_queue, 0.5)
         self.load_settings()
         super().__init__()
+        self.ids["elite_dangerous.path"].validate_executable()
 
     def check_queue(self, dt):
         if self.con.poll():
