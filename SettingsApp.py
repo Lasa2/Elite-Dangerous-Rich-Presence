@@ -1,12 +1,12 @@
 import logging
 import os
 import re
+import yaml
 
-os.environ["KIVY_NO_CONSOLELOG"] = "1"  # noqa # nopep8
-os.environ["KIVY_NO_FILELOG"] = "1"  # noqa # nopep8
-os.environ["KCFG_KIVY_LOG_LEVEL"] = "warning"  # noqa # nopep8
+from BackgroundApp import logging_conf  # noqa # nopep8
+os.environ["KCFG_KIVY_LOG_LEVEL"] = logging_conf["root"]["level"].lower()
+# noqa # nopep8
 
-import yaml  # noqa
 from kivy.app import App  # noqa
 from kivy.clock import Clock  # noqa
 from kivy.config import Config  # noqa
@@ -19,7 +19,6 @@ logger = logging.getLogger(__name__)
 Config.set("graphics", "resizable", False)
 Config.set("graphics", "height", 600)
 Config.set("graphics", "width", 800)
-Config.set("kivy", "log_enable", 0)
 
 
 class ToggleOption(BoxLayout):
@@ -43,9 +42,30 @@ class LoggingOption(BoxLayout):
 
 
 class TextOption(BoxLayout):
-
     def get_setting(self):
         return self.input.text
+
+    def on_focus(self):
+        return
+
+    def validate_path(self):
+        if not self.input.focus:
+            var = re.search("%(.+?)%", self.input.text)
+            if var is not None:
+                self.input.text = self.input.text.replace(
+                    f"%{var.group(1)}%", os.environ[var.group(1)])
+
+            if not os.path.exists(self.input.text) and self.input.text != "":
+                logger.warning("Invalid path: %s", self.input.text)
+
+    def validate_executable(self):
+        self.validate_path()
+        if not self.input.focus:
+            arg_inst = self.parent.parent.ids["elite_dangerous.arguments"]
+            if self.input.text.endswith(".exe") or self.input.text == "":
+                arg_inst.disabled = False
+            else:
+                arg_inst.disabled = True
 
 
 class Settings(Widget):
@@ -77,33 +97,26 @@ class Settings(Widget):
             except yaml.YAMLError as e:
                 logger.error("Unable to read settings.yaml, %s", e)
 
-    def convert_paths(self):
-        item = self.ids["elite_dangerous.path"].input_text
-        var = re.search("%(.+?)%", item)
-        if var is not None:
-            self.ids["elite_dangerous.path"].input_text = item.replace(
-                f"%{var.group(1)}%", os.environ[var.group(1)])
-
-        item = self.ids["general.journal_path"].input_text
-        var = re.search("%(.+?)%", item)
-        if var is not None:
-            self.ids["general.journal_path"].input_text = item.replace(
-                f"%{var.group(1)}%", os.environ[var.group(1)])
-
     def save_settings(self):
-        self.convert_paths()
+        # self.convert_paths()
         settings = dict()
         for entry in self.ids:
-            cat, sett = entry.split(".")
-            if cat not in settings:
-                settings[cat] = dict()
-            settings[cat][sett] = self.ids[entry].get_setting()
+            if "." in entry:
+                cat, sett = entry.split(".")
+                if cat not in settings:
+                    settings[cat] = dict()
+                settings[cat][sett] = self.ids[entry].get_setting()
         with open("settings.yaml", "w") as stream:
             try:
                 stream.write(yaml.dump(settings))
             except yaml.YAMLError as e:
                 logger.error("Unable to save settings.yaml, %s", e)
         self.con.send("changed_settings")
+
+        def reset(dt):
+            self.ids["savebutton"].text = "Save Options"
+        self.ids["savebutton"].text = "Saved!"
+        Clock.schedule_once(reset, 2)
 
 
 class SettingsApp(App):
@@ -113,6 +126,7 @@ class SettingsApp(App):
 
     def build(self):
         self.title = "Elite Dangerous Rich Presence Settings"
+        self.icon = "elite-dangerous-clean.ico"
         return Settings(self.con)
 
     @staticmethod

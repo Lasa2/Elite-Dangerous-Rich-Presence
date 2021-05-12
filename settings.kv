@@ -38,28 +38,28 @@
         text: "Debug"
         group: root.name.text
         state: "down" if root.state == "DEBUG" else "normal"
-        on_press: root.set_state("DEBUG")
+        on_press: root.set_state("DEBUG"); self.state = "down"
 
     ToggleButton:
         size_hint: .2, 1
         text: "Info"
         group: root.name.text
         state: "down" if root.state == "INFO" else "normal"
-        on_press: root.set_state("INFO")
+        on_press: root.set_state("INFO"); self.state = "down"
 
     ToggleButton:
         size_hint: .2, 1
         text: "Warning"
         group: root.name.text
         state: "down" if root.state == "WARNING" else "normal"
-        on_press: root.set_state("WARNING")
+        on_press: root.set_state("WARNING"); self.state = "down"
 
     ToggleButton:
         size_hint: .2, 1
         text: "Error"
         group: root.name.text
         state: "down" if root.state == "ERROR" else "normal"
-        on_press: root.set_state("ERROR")
+        on_press: root.set_state("ERROR"); self.state = "down"
 
 <TextOption>:
     orientation: "horizontal"
@@ -68,6 +68,7 @@
     input_hint: ""
     input_text: ""
     input: input
+    input_validation: None
     Label:
         size_hint: .2, 1
         id: lable_text
@@ -79,6 +80,7 @@
         multiline: False
         hint_text: root.input_hint
         text: root.input_text
+        on_focus: root.input_validation() if root.input_validation else root.on_focus()
 
 <BackgroundColor@Widget>:
     background_color: 1, 1, 1, 1
@@ -112,6 +114,7 @@
             text: "Journal Path"
             input_hint: "%USERPROFILE%/Saved Games/Frontier Developments/Elite Dangerous"
             input_text: root.settings["general"]["journal_path"]
+            input_validation: self.validate_path
 
         LoggingOption:
             id: general.log_level
@@ -175,6 +178,7 @@
             text: "Elite Dangerous Path"
             input_hint: "e.g. C:/Program Files (x86)/Steam/steamapps/common/Elite Dangerous/EDLaunch.exe"
             input_text: root.settings["elite_dangerous"]["path"]
+            input_validation: self.validate_executable
 
         TextOption:
             id: elite_dangerous.arguments
@@ -187,5 +191,6 @@
             state: root.settings["elite_dangerous"]["auto_launch"]
 
         Button:
+            id: savebutton
             text: "Save Options"
             on_press: root.save_settings()

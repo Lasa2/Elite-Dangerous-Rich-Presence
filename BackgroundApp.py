@@ -4,6 +4,7 @@ import logging.config
 import multiprocessing
 import os
 import subprocess
+import sys
 import time
 from multiprocessing import Pipe, Process
 from typing import Dict
@@ -22,6 +23,18 @@ with open("logging.yaml", "r") as stream:
         raise e
 logging.config.dictConfig(logging_conf)
 logger = logging.getLogger("BackgroundApp")
+
+
+def handle_exception(exc_type, exc_value, exc_traceback):
+    # if issubclass(exc_type, KeyboardInterrupt):
+    #     sys.__excepthook__(exc_type, exc_value, exc_traceback)
+    #     return
+
+    logger.error("Uncaught exception", exc_info=(
+        exc_type, exc_value, exc_traceback))
+
+
+sys.excepthook = handle_exception
 
 
 def save_logging_conf(conf):
@@ -248,6 +261,7 @@ class BackgroundApp():
                 logger.exception("Could not load settings.yaml, %s", e)
                 raise e
         logging_conf["root"]["level"] = self.config["general"]["log_level"]
+        save_logging_conf(logging_conf)
 
     def event_processing(self, event):
         game = self.ev.ev(event)
@@ -266,6 +280,9 @@ class BackgroundApp():
             self.open_settings = True
 
     def launch_ed(self):
+        if JournalFileApp.getLauncher() or JournalFileApp.getGame():
+            logger.info("Elite Launcher already running")
+            return
         if self.config["elite_dangerous"]["path"].endswith(".exe"):
             logger.debug("Lauch executable: %s with arguments: %s",
                          self.config["elite_dangerous"]["path"], self.config["elite_dangerous"]["arguments"])
@@ -275,10 +292,6 @@ class BackgroundApp():
                 subprocess.Popen(game)
                 logger.debug(
                     "Launched executable, now waiting for Elite Launcher")
-                while not JournalFileApp.getLauncher():
-                    logger.debug("Launcher not detected, sleeping 1s")
-                    time.sleep(1)
-                logger.debug("Elite Launcher running, continuing")
             except Exception as e:
                 logger.error("Unable to launch executable, %s", e)
         else:
@@ -288,12 +301,13 @@ class BackgroundApp():
                 os.system(f'"{self.config["elite_dangerous"]["path"]}"')
                 logger.debug(
                     "Launched, now waiting for Elite Launcher")
-                while not JournalFileApp.getLauncher():
-                    logger.debug("Launcher not detected, sleeping 1s")
-                    time.sleep(1)
-                logger.debug("Elite Launcher running, continuing")
             except Exception as e:
                 logger.error("Unable to launch executable, %s", e)
+        code = 0
+        while not JournalFileApp.getLauncher() and code == 0:
+            code = win32gui.PumpWaitingMessages()
+            time.sleep(0.1)
+        logger.debug("Elite Launcher running, continuing")
 
     def run(self):
         TrayApp.TrayApp(self.open_settings_call,
@@ -342,7 +356,6 @@ class BackgroundApp():
                 elif msg == "changed_settings":
                     logger.debug("Config changed, reloading")
                     self.load_config()
-                    save_logging_conf(logging_conf)
 
             if journal_parent_con.poll():
                 msg = journal_parent_con.recv()
@@ -355,8 +368,5 @@ class BackgroundApp():
 
 
 if __name__ == '__main__':
-    # if os.path.exists("edrp.log"):
-    #     os.remove("edrp.log")
-
     multiprocessing.freeze_support()
     BackgroundApp().run()
