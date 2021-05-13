@@ -196,13 +196,13 @@ class EventProcessing():
         if conf["gamemode"] and self.game_mode:
             state = self.game_mode
         if conf["multicrew_mode"] and self.multicrew_mode:
-            state += f" | {self.multicrew_mode}"
+            state = state + f" | {self.multicrew_mode}" if state else self.multicrew_mode
         if conf["cmdr"] and self.cmdr:
             large_text = f"CMDR {self.cmdr}"
         if conf["ship_text"] and self.ship in self.shipnames:
-            large_text += f" | {self.shipnames[self.ship]}"
+            large_text = large_text + f" | {self.shipnames[self.ship]}" if large_text else self.shipnames[self.ship]
         if conf["power"] and self.power:
-            large_text += f" | {self.power}"
+            large_text = large_text + f" | {self.power}" if large_text else self.power
         if conf["time_elapsed"] and self.time_elapsed:
             start = str(calendar.timegm(self.time_elapsed))
         if conf["location"] and self.location:
