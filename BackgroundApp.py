@@ -103,7 +103,10 @@ class EventProcessing():
         "anaconda": "Anaconda",
         "federation_corvette": "Federal Corvette",
         "cutter": "Imperial Cutter",
-        "testbuggy": "SRV"
+        "testbuggy": "SRV",
+        "utilitysuit_class1": "Maverick Suit",
+        "explorationsuit_class1": "Artemis Suit",
+        "tacticalsuit_class1": "Dominator Suit",
     }
 
     def ev(self, e):
@@ -127,7 +130,10 @@ class EventProcessing():
             self.game_mode = e["GameMode"]
             self.ship = e["Ship"].lower()
         elif ev == "Location" or ev == "SupercruiseExit":
-            if "Body" in e:
+            if "Docked" in e:
+                if e["Docked"]:
+                    self.location = f'{e["StarSystem"]} @ {e["StationName"]} ({e["DistFromStarLS"]} ls)'
+            elif "Body" in e:
                 if e["BodyType"] == "Station":
                     self.location = f'{e["StarSystem"]} @ {e["Body"]}'
                 else:
@@ -138,6 +144,8 @@ class EventProcessing():
             self.location = f'{e["Body"]} - Supercruise'
         elif ev == "Docked":
             self.location = f'{e["StarSystem"]} @ {e["StationName"]} ({e["DistFromStarLS"]} ls)'
+        elif ev == "Undocked":
+            self.location = self.location.replace("- Landed", "")
         elif ev == "LeaveBody" or ev == "SupercruiseEntry" or ev == "FSDJump":
             self.location = f'{e["StarSystem"]} - Supercruise'
         elif ev == "Outfitting":
@@ -170,16 +178,30 @@ class EventProcessing():
             self.multicrew_mode = "In a Wing"
         elif ev == "WingLeave":
             self.multicrew_mode = None
-        elif ev == "Touchdown":
-            self.location = str.replace(
-                self.location, "- Normal Space", "- Landed")
         elif ev == "LaunchSRV":
-            self.ship == "testbuggy"
+            if e["PlayerControlled"]:
+                self.ship = "testbuggy"
+                self.location = "- ".join(self.location.split("-")[:-1]) + "- SRV"
+        elif ev == "DockSRV":
+            self.location = "- ".join(self.location.split("-")[:-1]) + "- Landed"
+        elif ev == "Touchdown":
+            if e["PlayerControlled"]:
+                self.location = "- ".join(self.location.split("-")[:-1]) + "- Landed"
         elif ev == "Liftoff":
-            self.location = str.replace(
-                self.location, "- Landed", "- Normal Space")
+            if e["PlayerControlled"]:
+                self.location = "- ".join(self.location.split("-")[:-1]) + "- Normal Space"
         elif ev == "Loadout":
-            self.ship == e["Ship"].lower()
+            self.ship = e["Ship"].lower()
+        elif ev == "SuitLoadout":
+            self.ship = e["SuitName"]
+            if "-" in self.location:
+                self.location = "- ".join(self.location.split("-")[:-1]) + "- On foot"
+        elif ev == "Embark":
+            if e["SRV"]:
+                self.ship = "testbuggy"
+                self.location = "- ".join(self.location.split("-")[:-1]) + "- SRV"
+            else:
+                self.location = "- ".join(self.location.split("-")[:-1]) + "- Landed"
         elif ev == "Music" and e["MusicTrack"] == "CQCMenu":
             self.location = "CQC"
 
