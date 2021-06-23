@@ -132,7 +132,9 @@ class EventProcessing():
         elif ev == "Location" or ev == "SupercruiseExit":
             if "Docked" in e:
                 if e["Docked"]:
-                    self.location = f'{e["StarSystem"]} @ {e["StationName"]} ({e["DistFromStarLS"]} ls)'
+                    self.location = f'{e["StarSystem"]} @ {e["StationName"]}'
+                    if "DistFromStarLs" in e:
+                        self.location += f' ({e["DistFromStarLS"]} ls)'
             elif "Body" in e:
                 if e["BodyType"] == "Station":
                     self.location = f'{e["StarSystem"]} @ {e["Body"]}'
