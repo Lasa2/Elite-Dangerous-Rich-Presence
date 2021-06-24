@@ -268,6 +268,7 @@ class BackgroundApp():
     def __init__(self) -> None:
         self.load_config()
         self.ev = EventProcessing()
+        logger.info("Runing Elite Dangerous Rich Presence V4.6")
 
     def load_config(self):
         if not os.path.isfile("settings.yaml"):
@@ -285,6 +286,7 @@ class BackgroundApp():
                 logger.exception("Could not load settings.yaml, %s", e)
                 raise e
         logging_conf["root"]["level"] = self.config["general"]["log_level"]
+        logging.getLogger().setLevel(self.config["general"]["log_level"])
         save_logging_conf(logging_conf)
 
     def event_processing(self, event):
@@ -305,7 +307,7 @@ class BackgroundApp():
 
     def launch_ed(self):
         if JournalFileApp.getLauncher() or JournalFileApp.getGame():
-            logger.info("Elite Launcher already running")
+            logger.info("Elite already running")
             return
         if self.config["elite_dangerous"]["path"].endswith(".exe"):
             logger.debug("Lauch executable: %s with arguments: %s",
