@@ -268,7 +268,7 @@ class BackgroundApp():
     def __init__(self) -> None:
         self.load_config()
         self.ev = EventProcessing()
-        logger.info("Running Elite Dangerous Rich Presence V4.6")
+        logger.info("Running Elite Dangerous Rich Presence V4.7")
 
     def load_config(self):
         if not os.path.isfile("settings.yaml"):
