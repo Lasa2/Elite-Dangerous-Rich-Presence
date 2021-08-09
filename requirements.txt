@@ -5,5 +5,5 @@ kivy-deps.glew==0.3.0
 kivy-deps.sdl2==0.3.1
 pypiwin32==223
 pypresence==4.2.0
-pywin32==300
+pywin32==301
 PyYAML==5.4.1
