@@ -7,6 +7,7 @@ import win32api
 import win32con
 import win32gui
 import winerror
+import pywintypes
 
 logger = logging.getLogger(__name__)
 
@@ -113,7 +114,11 @@ class TrayApp:
 
         pos = win32gui.GetCursorPos()
         # See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/winui/menus_0hdi.asp
-        win32gui.SetForegroundWindow(self.hwnd)
+        try:
+            win32api.keybd_event(13, 0, 0, 0)
+            win32gui.SetForegroundWindow(self.hwnd)
+        except pywintypes.error as e:
+            logger.error("Error while trying to focus window: %s", e)
         win32gui.TrackPopupMenu(
             menu, win32con.TPM_LEFTALIGN, pos[0], pos[1], 0, self.hwnd, None)
         win32gui.PostMessage(self.hwnd, win32con.WM_NULL, 0, 0)
