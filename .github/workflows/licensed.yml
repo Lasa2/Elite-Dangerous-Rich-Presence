@@ -1,0 +1,12 @@
+name: Licensed CI
+
+on:
+  workflow_dispatch:
+
+jobs:
+  update_license:
+    runs-on: ubuntu-latest
+
+    steps:
+       - name: Licensed CI
+         uses: jonabc/licensed-ci@v1.7.0
