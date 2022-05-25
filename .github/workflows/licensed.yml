@@ -19,7 +19,7 @@ jobs:
           cache: pip # cache dependencies for faster subsequent runs.
       # install your projects dependencies
       - run: "python -m venv .venv"
-      - run: ".venv/bin/activate"
+      - run: ".venv/Scripts/activate"
       - run: "pip install -r requirements.txt"
       - id: licensed
         uses: jonabc/licensed-ci@v1.7.0
