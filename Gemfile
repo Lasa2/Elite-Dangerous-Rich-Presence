@@ -1,0 +1,1 @@
+gem 'licensed', :group => 'development'
