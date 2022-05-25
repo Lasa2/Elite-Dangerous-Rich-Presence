@@ -1,0 +1,12 @@
+sources:
+  python:
+    virtual_env_dir: "/.venv3.10"
+
+allowed:
+  - mit
+  - apache-2.0
+  - bsd-2-clause
+  - bsd-3-clause
+  - glp
+  
+  
