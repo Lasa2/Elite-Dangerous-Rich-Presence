@@ -1,6 +1,6 @@
 sources:
   python:
-    virtual_env_dir: "/.venv3.10"
+    virtual_env_dir: ".venv"
 
 allowed:
   - mit
