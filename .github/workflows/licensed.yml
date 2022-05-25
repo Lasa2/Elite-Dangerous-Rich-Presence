@@ -9,17 +9,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-ruby@v1
-        with:
-          ruby-version: 2.6
-          bundler-cache: true # improve performance on subsequent runs
-          cache-version: 1
+      - uses: actions/setup-ruby@v3
       - uses: actions/setup-python@v3.1.2
         with:
           python-version: "3.10"
           cache: pip # cache dependencies for faster subsequent runs.
       # install your projects dependencies
       - run: "python -m venv .venv"
+      - run: ".venv/Scripts/activate"
       - run: "pip install -r requirements.txt"
       - id: licensed
         uses: jonabc/licensed-ci@v1
