@@ -48,7 +48,23 @@ class JournalFileApp:
         with os.scandir(self.journalpath) as it:
             for entry in it:
                 if entry.is_file() and "Journal" in entry.name and ".log" in entry.name:
-                    date = int(re.sub(r"[a-zA-Z.]", "", entry.name))
+                    try:
+                        date = int(re.sub(r"[a-zA-Z.]", "", entry.name))
+                    except ValueError as e:
+                        # If ValueError, assume re.sub failed by matching new ED date formatting,
+                        # so we need to convert this new format into the old one.
+                        #
+                        # Regex match Journal.YY(YY)-(mm)-(DD)T(HHMMSS).(nn).log and convert to old-style number.
+                        # \d{2}(\d{2}) to match YYYY but only grab the last part of the year,
+                        # So from 2022 we will keep 22 in the matched group.
+                        new_date_re_match = re.fullmatch(r"Journal\.\d{2}(\d{2})-(\d{2})-(\d{2})T(\d{6})\.(\d{2})\.log", entry.name)
+                        if new_date_re_match is not None:
+                            logger.debug("New ED formatting detected, parsing new date")
+                            date = int("".join(new_date_re_match.groups()))
+                        else:
+                            logger.warning("Unknown Journal file format. Please, check the file: %s", entry.name, exc_info=e)
+                    except Exception as e:
+                        logger.warning("Unknown Journal file format. Please, check the file: %s", entry.name, exc_info=e)
                     if date > self.active_file[0]:
                         self.active_file = (date, entry)
 
