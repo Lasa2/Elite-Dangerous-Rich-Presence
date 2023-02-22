@@ -1,0 +1,7 @@
+[MASTER]
+extension-pkg-whitelist=[
+    win32api,
+    win32con,
+    win32gui,
+    winerror,
+]
