@@ -8,4 +8,5 @@ wiki/
 Assets/
 env/
 .venv/
+.mypy_cache/
 settings.yaml
