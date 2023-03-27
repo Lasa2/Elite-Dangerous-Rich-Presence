@@ -10,3 +10,4 @@ env/
 .venv/
 .mypy_cache/
 settings.yaml
+filtered_journals/
