@@ -47,7 +47,7 @@ async def main():
     settings_app = SettingsApp()
 
     TaskbarApp(
-        "Elite Dangerous Rich Presence",
+        f"Elite Dangerous Rich Presence - V{__version__}",
         icon_path="elite-dangerous-clean.ico",
         callback=settings_app.open_settings_callback,
     )
@@ -71,11 +71,16 @@ async def main():
                 settings_app.open_flag = False
                 await settings_app.launch_settings_app()
 
+            # Close if taskbar app is closed
             if win32gui.PumpWaitingMessages() != 0:
                 await settings_app.queue.put(UiMessages.EXIT)
                 if settings_app.task:
                     await asyncio.wait_for(settings_app.task, None)
+                # Can't call presence.close(), because loop isn't closed yet
+                presence.send_data(2, {"v": 1, "client_id": presence.client_id})
+                presence.sock_writer.close()
                 await logger.complete()
+                logger.stop()
                 return
 
             await asyncio.sleep(0.1)
@@ -88,7 +93,6 @@ async def main():
 
     active = True
     while active:
-
         if settings_app.open_flag:
             settings_app.open_flag = False
             await settings_app.launch_settings_app()
@@ -105,7 +109,7 @@ async def main():
             await event_processor(event)
             await presence.update(**event_processor.rpc_dict())
 
-            if event["event"] == "LauncherClosed":
+            if event["event"] == "LauncherClosed" or event["event"] == "Shutdown":
                 await presence.clear()
 
             # Remove identfiying information from logs
