@@ -90,6 +90,19 @@ class EventProcessor:
     secs_elapsed: int = 0
     legacy = False
 
+    def reset_state(self):
+        self.starsystem = "Launcher"
+        self.body = None
+        self.status = Status.LAUNCHER
+        self.taxi = False
+        self.game_mode = None
+        self.cmdr = None
+        self.power = None
+        self.ship = None
+        self.srv = None
+        self.multicrew_mode = None
+        self.legacy = False
+
     async def __call__(self, event: dict[str, Any]):
         match event:
             # Startup & shutdown events
@@ -111,13 +124,21 @@ class EventProcessor:
                     self.legacy = True
                     logger.debug("Enabled Legacy Mode")
 
+                self.reset_state()
+                self.status = Status.MAIN_MENU
+                self.starsystem = "Mainmenu"
+                self.secs_elapsed = iso_to_unix(timestamp)
+
+            case {"event": "Music", "MusicTrack": "MainMenu"}:
+                self.reset_state()
+                self.status = Status.MAIN_MENU
+                self.starsystem = "Mainmenu"
+
             case (
                 {"event": "Shutdown", "timestamp": timestamp}
                 | {"event": "Launcher", "timestamp": timestamp}
             ):
-                self.location = "Launcher"
-                self.status = Status.LAUNCHER
-                self.ship = None
+                self.reset_state()
                 self.secs_elapsed = iso_to_unix(timestamp)
 
             case {
@@ -152,12 +173,14 @@ class EventProcessor:
 
                 if "Taxi" in data and data["Taxi"] is True:
                     self.taxi = True
+                    self.ship = "adder_taxi"
 
                 if "Multicrew" in data and data["Multicrew"] is True:
                     self.multicrew_mode = "Multicrew"
 
                 if docked:
                     self.status = Status.DOCKED
+                    self.body = f"@ {data['StationName']}"
                 elif "InSRV" in data:
                     self.status = Status.SRV
                 elif "OnFoot" in data:
@@ -165,6 +188,7 @@ class EventProcessor:
                         self.status = Status.ON_FOOT_PLANET
                     else:
                         self.status = Status.ON_FOOT_STATION
+                        self.body = f"@ {data['Body']}"
                 else:
                     self.status = Status.NORMAL_SPACE
             # Ingame Events
@@ -193,12 +217,15 @@ class EventProcessor:
                 self.status = Status.DOCKED
                 self.taxi = taxi
                 self.body = f"@ {station}"
+                if taxi:
+                    self.ship = "adder_taxi"
 
             # Supercruise
             case {
                 "event": "SupercruiseEntry",
             }:
                 self.status = Status.SUPERCRUISE
+                self.body = None
 
             case {
                 "event": "FSDJump",
@@ -258,6 +285,8 @@ class EventProcessor:
             }:
                 self.status = Status.LANDED
                 self.taxi = taxi
+                if taxi:
+                    self.ship = "adder_taxi"
             # SRV
             case {
                 "event": "LaunchSRV",
@@ -374,7 +403,23 @@ class EventProcessor:
             details = self.starsystem
 
             if self.body:
-                details += self.body
+                details = f"{details} {self.body}"
+
+            match self.status:
+                case Status.DOCKED:
+                    details += " - Docked"
+                case Status.NORMAL_SPACE:
+                    details += " - Normal Space"
+                case Status.SUPERCRUISE:
+                    details += " - Supercruise"
+                case Status.LANDED:
+                    details += " - Landed"
+                case Status.SRV:
+                    details += " - SRV"
+                case Status.ON_FOOT_STATION:
+                    details += " - On Station"
+                case Status.ON_FOOT_PLANET:
+                    details += " - On Planet"
 
         if conf.ship_icon and self.ship:
             large_image = self.ship
