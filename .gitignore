@@ -8,4 +8,7 @@ wiki/
 Assets/
 env/
 .venv/
+.mypy_cache/
 settings.yaml
+filtered_journals/
+settings.json

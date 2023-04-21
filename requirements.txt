@@ -1,3 +1,0 @@
-dearpygui==1.6.2
-pypresence==4.2.1
-pywin32==304

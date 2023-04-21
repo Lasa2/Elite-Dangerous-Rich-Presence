@@ -1,0 +1,29 @@
+[tool.poetry]
+authors = ["Lasa2 <hi.lasse11@gmail.com>"]
+description = ""
+license = "MIT"
+name = "elite-dangerous-rich-presence"
+packages = [{include = "elite_dangerous_rich_presence"}]
+readme = "README.md"
+version = "5.0.0"
+
+[tool.poetry.dependencies]
+flet = "^0.4.0"
+loguru = "^0.6.0"
+pydantic = "^1.10.5"
+pypresence = "^4.2.1"
+python = ">=3.11,<3.12"
+pywin32 = "^305"
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.1.0"
+flake8 = "^6.0.0"
+isort = "^5.12.0"
+mypy = "^1.0.1"
+pylint = "^2.16.2"
+pylint-pydantic = "^0.1.6"
+pyinstaller = "^5.10.1"
+
+[build-system]
+build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core"]
