@@ -1,3 +1,4 @@
+"""This script pulls all Journal files and filters the events, then writes that as valid json to the out dir."""
 import json
 import os
 from pathlib import Path
