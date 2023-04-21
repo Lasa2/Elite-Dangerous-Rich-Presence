@@ -58,7 +58,7 @@ SUITS = {
 
 SRVS = {
     "testbuggy": "SRV",
-    # TODO: Get name of Scrorpion SRV
+    "combat_multicrew_srv_01": "Scorpion",
 }
 
 VESSELS = SHIPS | SUITS | SRVS
@@ -249,14 +249,14 @@ class EventProcessor:
             # Normal Space
             case {"event": "Undocked"}:
                 self.status = Status.NORMAL_SPACE
-                self.body = None
 
-            case {
-                "event": "SupercruiseExit",
-                "Body": body,
-            }:
-                self.body = body.replace(self.starsystem, "")
+            case {"event": "SupercruiseExit", "Body": body, "BodyType": body_type}:
                 self.status = Status.NORMAL_SPACE
+
+                body = body.replace(self.starsystem, "")
+                self.body = body
+                if body_type == "Station":
+                    self.body = f"@ {body}"
 
             case {
                 "event": "Liftoff",
@@ -415,7 +415,7 @@ class EventProcessor:
                 case Status.LANDED:
                     details += " - Landed"
                 case Status.SRV:
-                    details += " - SRV"
+                    details += f" - {SRVS[self.srv]}"
                 case Status.ON_FOOT_STATION:
                     details += " - On Station"
                 case Status.ON_FOOT_PLANET:
