@@ -110,7 +110,7 @@ class JournalReader:
     async def watch(self):
         logger.debug("Waiting for Elite or Launcher")
         # Used to track the latest timestamp of the launcher to not read old journal files
-        timestamp = datetime(1, 1, 1, 1, 1, 1)
+        timestamp = datetime.now()
         while True:
             if game_active():
                 logger.debug("Elite open")
