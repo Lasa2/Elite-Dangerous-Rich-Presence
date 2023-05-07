@@ -91,15 +91,15 @@ class TaskbarApp:
 
         if os.path.isfile(icon_path):
             icon_flags = win32con.LR_LOADFROMFILE | win32con.LR_DEFAULTSIZE
-            hicon = win32gui.LoadImage(
+            self.hicon = win32gui.LoadImage(
                 handle_instance, str(icon_path), win32con.IMAGE_ICON, 0, 0, icon_flags
             )
         else:
             logger.warning("Unable to find icon file! Using default!")
-            hicon = win32gui.LoadIcon(0, win32con.IDI_APPLICATION)
+            self.hicon = win32gui.LoadIcon(0, win32con.IDI_APPLICATION)
 
         flags = win32gui.NIF_ICON | win32gui.NIF_MESSAGE | win32gui.NIF_TIP
-        nid = (self.hwnd, 0, flags, win32con.WM_USER + 20, hicon, self.title)
+        nid = (self.hwnd, 0, flags, win32con.WM_USER + 20, self.hicon, self.title)
         try:
             win32gui.Shell_NotifyIcon(win32gui.NIM_ADD, nid)
         except win32gui.error:
@@ -137,6 +137,8 @@ class TaskbarApp:
             self.on_double_click()
         elif lparam == win32con.WM_RBUTTONUP:
             self.on_right_mouse_button()
+        elif lparam == 1029:  # Ballon Tooltip clicked
+            self.toast_callback()
         return 1
 
     def on_left_mouse_button(self, *args):
@@ -168,3 +170,20 @@ class TaskbarApp:
 
     def on_double_click(self, *args):
         ...
+
+    def show_toast(self, msg: str, toast_callback: Callable[[], None]):
+        self.toast_callback = toast_callback
+        win32gui.Shell_NotifyIcon(
+            win32gui.NIM_MODIFY,
+            (
+                self.hwnd,
+                0,
+                win32gui.NIF_INFO,
+                win32con.WM_USER + 20,
+                self.hicon,
+                "Ballon Tooltip",
+                msg,
+                200,
+                self.title,
+            ),
+        )

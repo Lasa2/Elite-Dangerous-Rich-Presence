@@ -107,6 +107,10 @@ class GeneralOptions(ft.UserControl):
         settings.general.auto_close = event.control.value
 
     @save_afterwards
+    async def set_check_updates(self, event: ft.ControlEvent):
+        settings.general.check_updates = event.control.value
+
+    @save_afterwards
     async def set_loglevel(self, event: ft.ControlEvent):
         settings.general.log_level = event.control.value
 
@@ -125,7 +129,7 @@ class GeneralOptions(ft.UserControl):
                                     ft.PopupMenuItem(
                                         text="Reset Journal Path",
                                         on_click=self.reset_journal_path,
-                                    )
+                                    ),
                                 ],
                             ),
                         ),
@@ -141,6 +145,11 @@ class GeneralOptions(ft.UserControl):
                                     label="Close with Game",
                                     value=settings.general.auto_close,
                                     on_change=self.set_autoclose,
+                                ),
+                                ft.Switch(
+                                    label="Check for Updates",
+                                    value=settings.general.check_updates,
+                                    on_change=self.set_check_updates,
                                 ),
                             ],
                         ),
