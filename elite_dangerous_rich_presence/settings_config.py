@@ -34,6 +34,7 @@ def read_settings_json(settings: BaseSettings) -> dict[str, Any]:
 class GeneralSettings(BaseModel):
     auto_tray = False
     auto_close = False
+    check_updates = True
     journal_path = DEFAULT_JOURNAL_PATH
     log_level = "Info"
 

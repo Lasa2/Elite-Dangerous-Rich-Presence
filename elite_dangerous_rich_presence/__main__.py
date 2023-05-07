@@ -1,11 +1,12 @@
 import asyncio
+import os
 from pathlib import Path
 
 import win32gui
 from loguru import logger
 from pypresence import AioPresence
 
-from elite_dangerous_rich_presence import __version__
+from elite_dangerous_rich_presence import LATEST_RELEASE_URL, __version__
 from elite_dangerous_rich_presence.event_processor import EventProcessor
 from elite_dangerous_rich_presence.journal_reader import (
     JournalReader,
@@ -19,7 +20,11 @@ from elite_dangerous_rich_presence.taskbar_app import TaskbarApp
 from elite_dangerous_rich_presence.user_controls.elite_dangerous import (
     launch_elite_dangerous,
 )
-from elite_dangerous_rich_presence.util import UiMessages, remove_old_logs
+from elite_dangerous_rich_presence.util import (
+    UiMessages,
+    is_latest_version,
+    remove_old_logs,
+)
 
 
 def file_log_filter(record):
@@ -46,11 +51,17 @@ async def main():
 
     settings_app = SettingsApp()
 
-    TaskbarApp(
+    taskbar_app = TaskbarApp(
         f"Elite Dangerous Rich Presence - V{__version__}",
         icon_path="elite-dangerous-clean.ico",
         callback=settings_app.open_settings_callback,
     )
+
+    if settings.general.check_updates and not is_latest_version():
+        taskbar_app.show_toast(
+            "A new version is available! Click here to open in browser.",
+            lambda: os.startfile(LATEST_RELEASE_URL),
+        )
 
     presence = AioPresence(535809971867222036)
     logger.debug("Connecting Rich Presence")

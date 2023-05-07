@@ -8,12 +8,13 @@ readme = "README.md"
 version = "5.0.0"
 
 [tool.poetry.dependencies]
-flet = "^0.4.0"
-loguru = "^0.6.0"
-pydantic = "^1.10.5"
+flet = "^0.6.0"
+loguru = "^0.7.0"
+pydantic = "^1.10.7"
 pypresence = "^4.2.1"
 python = ">=3.11,<3.12"
-pywin32 = "^305"
+pywin32 = "^306"
+httpx = "^0.23.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.1.0"
