@@ -210,9 +210,7 @@ Project Link: [https://github.com/Lasa2/Elite-Dangerous-Rich-Presence](https://g
 [issues-shield]: https://img.shields.io/github/issues/Lasa2/Elite-Dangerous-Rich-Presence.svg?style=for-the-badge
 [issues-url]: https://github.com/Lasa2/Elite-Dangerous-Rich-Presence/issues
 [license-shield]: https://img.shields.io/github/license/Lasa2/Elite-Dangerous-Rich-Presence.svg?style=for-the-badge
-[license-url]: https://github.com/Lasa2/Elite-Dangerous-Rich-Presence/blob/master/LICENSE.txt
-[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url]: https://linkedin.com/in/linkedin_username
+[license-url]: https://github.com/Lasa2/Elite-Dangerous-Rich-Presence/blob/master/LICENSE
 [product-screenshot]: images/screenshot.png
 [pypresence]: https://img.shields.io/badge/pypresence-00bb88.svg?style=for-the-badge&logo=discord&logoWidth=20
 [pypresence-url]: https://github.com/qwertyquerty/pypresence
