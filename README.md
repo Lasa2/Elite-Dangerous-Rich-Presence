@@ -34,8 +34,6 @@
     <a href="https://github.com/Lasa2/Elite-Dangerous-Rich-Presence/blob/master/README.md"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/Lasa2/Elite-Dangerous-Rich-Presence">View Demo</a>
-    ·
     <a href="https://github.com/Lasa2/Elite-Dangerous-Rich-Presence/issues">Report Bug</a>
     ·
     <a href="https://github.com/Lasa2/Elite-Dangerous-Rich-Presence/issues">Request Feature</a>
