@@ -95,7 +95,7 @@
 <!-- GETTING STARTED -->
 ## Getting Started
 
-To simply use the app unpack the latest release and run the Elite Dangerous Rich Presence.exe.
+To simply use the app unpack the latest release and run the Elite Dangerous Rich Presence.exe. To keep your settings between updates simply copy the settings.json file.
 
 If you want to modify and build your own app, then follow the installation and usage guide.
 
