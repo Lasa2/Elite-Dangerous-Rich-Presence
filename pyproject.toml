@@ -1,6 +1,6 @@
 [tool.poetry]
 authors = ["Lasa2 <hi.lasse11@gmail.com>"]
-description = ""
+description = "A standalone Discord Rich Presence application which hides in the System Tray."
 license = "MIT"
 name = "elite-dangerous-rich-presence"
 packages = [{include = "elite_dangerous_rich_presence"}]
