@@ -171,6 +171,9 @@ class EventProcessor:
                 if body := data.get("Body"):
                     self.body = body.replace(starsystem, "")
 
+                    if data.get("BodyType") == "Station":
+                        self.body = f"@ {self.body}"
+
                 if "Taxi" in data and data["Taxi"] is True:
                     self.taxi = True
                     self.ship = "adder_taxi"
@@ -233,6 +236,7 @@ class EventProcessor:
             }:
                 self.status = Status.SUPERCRUISE
                 self.starsystem = starsystem
+                self.body = None
 
             # Supercruise - Near Body
             case {
@@ -311,9 +315,12 @@ class EventProcessor:
             case {
                 "event": "Disembark",
                 "OnStation": True,
-                "Taxi": False,
+                "Taxi": taxi,
             }:
                 self.status = Status.ON_FOOT_STATION
+
+                if taxi:
+                    self.taxi = False
 
             case {
                 "event": "DropShipDeployed",
