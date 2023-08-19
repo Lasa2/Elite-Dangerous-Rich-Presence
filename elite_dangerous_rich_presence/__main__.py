@@ -47,7 +47,7 @@ async def main():
         "Elite Dangerous Rich Presence - Version {version}",
         version=__version__,
     )
-    logger.debug("Loaded Settings: {settings}", settings=settings.model_dump_json())
+    logger.debug("Loaded Settings: {settings}", settings=settings.json())
 
     settings_app = SettingsApp()
 
