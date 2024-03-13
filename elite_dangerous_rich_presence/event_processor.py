@@ -47,7 +47,7 @@ SHIPS = {
     "federation_corvette": "Federal Corvette",
     "cutter": "Imperial Cutter",
     # Taxi
-    "adder_taxt": "Taxi",
+    "adder_taxi": "Taxi",
 }
 
 SUITS = {
@@ -122,7 +122,7 @@ class EventProcessor:
                 )
                 if game_version.startswith("3.8"):
                     self.legacy = True
-                    logger.debug("Enabled Legacy Mode")
+                    logger.debug("Legacy Mode")
 
                 self.reset_state()
                 self.status = Status.MAIN_MENU

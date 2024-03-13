@@ -19,17 +19,14 @@ from elite_dangerous_rich_presence.util import cancelable, now_as_iso
 
 
 def launcher_active():
-    if win32gui.FindWindow(None, "Elite Dangerous Launcher"):
-        return True
-    else:
-        return False
+    return bool(
+        win32gui.FindWindow(None, "Elite Dangerous Launcher")
+        or win32gui.FindWindow(None, "elite-launcher")
+    )
 
 
 def game_active():
-    if win32gui.FindWindow(None, "Elite - Dangerous (CLIENT)"):
-        return True
-    else:
-        return False
+    return bool(win32gui.FindWindow(None, "Elite - Dangerous (CLIENT)"))
 
 
 def any_active():
@@ -63,7 +60,9 @@ class JournalFile:
 
 
 class JournalReader:
-    file = JournalFile(Path("."), datetime(1, 1, 1, 1, 1, 1, tzinfo=local_timezone()), 0)
+    file = JournalFile(
+        Path("."), datetime(1, 1, 1, 1, 1, 1, tzinfo=local_timezone()), 0
+    )
     queue: asyncio.Queue
 
     def __init__(self, queue: asyncio.Queue) -> None:
