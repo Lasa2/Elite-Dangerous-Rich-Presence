@@ -1,11 +1,15 @@
-import json
 import os
 from functools import wraps
 from pathlib import Path
-from typing import Any
 
 from loguru import logger
-from pydantic import BaseModel, BaseSettings, validator
+from pydantic import BaseModel, ConfigDict, validator
+from pydantic_settings import (
+    BaseSettings,
+    PydanticBaseSettingsSource,
+    SettingsConfigDict,
+    JsonConfigSettingsSource,
+)
 
 from elite_dangerous_rich_presence.util import LaunchMode
 
@@ -20,23 +24,23 @@ DEFAULT_JOURNAL_PATH = Path(
 
 def write_settings_json(settings: BaseSettings) -> None:
     SETTINGS_FILE.write_text(
-        settings.json(), encoding=settings.__config__.env_file_encoding
+        settings.model_dump_json(), encoding=settings.model_config["env_file_encoding"]
     )
 
 
-def read_settings_json(settings: BaseSettings) -> dict[str, Any]:
-    encoding = settings.__config__.env_file_encoding
-    if SETTINGS_FILE.is_file():
-        return json.loads(Path("settings.json").read_text(encoding))
-    return dict()
+# def read_settings_json(settings: BaseSettings) -> dict[str, Any]:
+#     encoding = settings.__config__.env_file_encoding
+#     if SETTINGS_FILE.is_file():
+#         return json.loads(Path("settings.json").read_text(encoding))
+#     return dict()
 
 
 class GeneralSettings(BaseModel):
-    auto_tray = False
-    auto_close = False
-    check_updates = True
-    journal_path = DEFAULT_JOURNAL_PATH
-    log_level = "Info"
+    auto_tray: bool = False
+    auto_close: bool = False
+    check_updates: bool = True
+    journal_path: Path = DEFAULT_JOURNAL_PATH
+    log_level: str = "Info"
 
     @validator("journal_path")
     def path_exists(cls, v: str | Path) -> Path:
@@ -49,20 +53,24 @@ class GeneralSettings(BaseModel):
             raise ValueError("Journal Path: Path is not a directory")
         return path
 
-    class Config:
-        validate_assignment = True
+    model_config = ConfigDict(
+        validate_assignment=True,
+    )
+
+    # class Config:
+    #     validate_assignment = True
 
 
 class RichPrensenceSettings(BaseModel):
-    cmdr = True
-    power = True
-    location = True
-    gamemode = True
-    multicrew_mode = True
-    multicrew_size = True
-    time_elapsed = True
-    ship_icon = True
-    ship_text = True
+    cmdr: bool = True
+    power: bool = True
+    location: bool = True
+    gamemode: bool = True
+    multicrew_mode: bool = True
+    multicrew_size: bool = True
+    time_elapsed: bool = True
+    ship_icon: bool = True
+    ship_text: bool = True
 
 
 class EliteDangerousSettings(BaseModel):
@@ -88,26 +96,52 @@ class EliteDangerousSettings(BaseModel):
             return v.value
         return v
 
-    class Config:
-        validate_assignment = True
+    model_config = ConfigDict(
+        validate_assignment=True,
+    )
+
+    # class Config:
+    #     validate_assignment = True
 
 
 class Settings(BaseSettings):
-    general = GeneralSettings()
-    rich_presence = RichPrensenceSettings()
-    elite_dangerous = EliteDangerousSettings()
+    general: GeneralSettings = GeneralSettings()
+    rich_presence: RichPrensenceSettings = RichPrensenceSettings()
+    elite_dangerous: EliteDangerousSettings = EliteDangerousSettings()
 
-    class Config:
-        env_file_encoding = "utf-8"
+    model_config = SettingsConfigDict(
+        env_file_encoding="utf-8",
+        json_file=SETTINGS_FILE,
+    )
 
-        @classmethod
-        def customise_sources(cls, init_settings, env_settings, file_secret_settings):
-            return (
-                init_settings,
-                env_settings,
-                file_secret_settings,
-                read_settings_json,
-            )
+    @classmethod
+    def settings_customise_sources(
+        cls,
+        settings_cls: BaseSettings,
+        init_settings: PydanticBaseSettingsSource,
+        env_settings: PydanticBaseSettingsSource,
+        dotenv_settings: PydanticBaseSettingsSource,
+        file_secret_settings: PydanticBaseSettingsSource,
+    ) -> tuple[PydanticBaseSettingsSource, ...]:
+        return (
+            JsonConfigSettingsSource(settings_cls),
+            init_settings,
+            env_settings,
+            dotenv_settings,
+            file_secret_settings,
+        )
+
+    # class Config:
+    #     env_file_encoding = "utf-8"
+
+    #     @classmethod
+    #     def customise_sources(cls, init_settings, env_settings, file_secret_settings):
+    #         return (
+    #             init_settings,
+    #             env_settings,
+    #             file_secret_settings,
+    #             read_settings_json,
+    #         )
 
 
 settings = Settings()
@@ -117,7 +151,7 @@ def save_afterwards(func):
     @wraps(func)
     async def save_settings(*args, **kwargs):
         await func(*args, **kwargs)
-        logger.debug(settings.json())
+        logger.debug(settings.model_dump_json())
         write_settings_json(settings)
 
     return save_settings

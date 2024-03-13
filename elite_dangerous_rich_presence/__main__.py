@@ -144,7 +144,7 @@ async def main():
         await asyncio.wait_for(settings_app.task, None)
 
     await logger.complete()
-    logger.stop()
+    logger.remove()
 
 
 asyncio.run(main())
