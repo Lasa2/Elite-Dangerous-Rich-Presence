@@ -194,6 +194,7 @@ Project Link: [https://github.com/Lasa2/Elite-Dangerous-Rich-Presence](https://g
 ## Acknowledgments
 
 * [Best-README-Template](https://github.com/othneildrew/Best-README-Template)
+* [Elite Dangerous Assets](https://github.com/Venefilyn/EDAssets)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
