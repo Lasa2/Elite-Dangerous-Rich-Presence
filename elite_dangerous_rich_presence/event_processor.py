@@ -40,6 +40,7 @@ SHIPS = {
     "ferdelance": "Fer-de-Lance",
     "mamba": "Mamba",
     "python": "Python",
+    "python_nx": "Python Mk II",
     "type9": "Type-9 Heavy",
     "belugaliner": "Beluga Liner",
     "type9_military": "Type-10 Defender",
