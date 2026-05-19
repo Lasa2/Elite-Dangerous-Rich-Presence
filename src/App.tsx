@@ -1,270 +1,75 @@
-import { invoke } from "@tauri-apps/api/core";
-import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
+import { Show } from "solid-js";
+import "./App.css";
+import { Titlebar } from "./components/Titlebar";
 import {
-  disable as disableAutostart,
-  enable as enableAutostart,
-  isEnabled as isAutostartEnabled,
-} from "@tauri-apps/plugin-autostart";
-import { createEffect, createSignal, onMount, Show } from "solid-js";
-import type { LogLevel } from "../src-tauri//bindings/LogLevel";
-import type { Settings } from "../src-tauri//bindings/Settings";
-import type { DiscordRichPresenceFields } from "../src-tauri/bindings/DiscordRichPresenceFields";
-import type { LaunchMethod } from "../src-tauri/bindings/LaunchMethod";
-import { AdvancedSection } from "./AdvancedSection";
-import { DiscordSection } from "./DiscordSection";
-import { GeneralSection } from "./GeneralSection";
-import { LaunchOptionsSection } from "./LaunchOptionsSection";
-import { Titlebar } from "./Titlebar";
-import { open } from "@tauri-apps/plugin-dialog";
+  AdvancedSection,
+  DiscordSection,
+  GeneralSection,
+  LaunchSection,
+} from "./components/sections";
+import { useSettings } from "./hooks";
 
-
-
-async function loadSettings(): Promise<Settings> {
-  return await invoke<Settings>("cmd_load_settings");
-}
-
-async function updateSettings(settings: Settings): Promise<void> {
-  await invoke("cmd_update_settings", { newSettings: settings });
-}
-
-async function launchGame(): Promise<void> {
-  await invoke("cmd_launch_game");
-}
-
-export default function App() {
-  const [settings, setSettings] = createSignal<Settings | null>(null);
-  const [saving, setSaving] = createSignal(false);
-  const [loading, setLoading] = createSignal(true);
-  const [isMaximized, setIsMaximized] = createSignal(false);
-
-  const logLevels: LogLevel[] = ["Trace", "Debug", "Info", "Warn", "Error"];
-  const launchMethodLabels: Record<LaunchMethod, string> = {
-    Steam: "Steam",
-    EpicGames: "Epic Games",
-    Executable: "Executable",
-  };
-  const currentWindow = getCurrentWebviewWindow();
-
-  const handleMinimize = () => {
-    currentWindow.minimize();
-  };
-
-  const handleToggleMaximize = async () => {
-    await currentWindow.toggleMaximize();
-    const max = await currentWindow.isMaximized();
-    setIsMaximized(max);
-  };
-
-  const handleHeaderDoubleClick = async () => {
-    await currentWindow.toggleMaximize();
-    const max = await currentWindow.isMaximized();
-    setIsMaximized(max);
-  };
-
-  const handleClose = () => {
-    currentWindow.close();
-  };
-
-  const handleHeaderMouseDown = (e: MouseEvent) => {
-    if (e.button !== 0) return;
-    if (e.detail === 2) return; // let dblclick do maximize/restore
-    currentWindow.startDragging();
-  };
-
-  // Load settings once on mount
-  onMount(async () => {
-    const loaded = await loadSettings();
-    setSettings(loaded);
-    setLoading(false);
-
-    // sync from OS autostart state -> settings flag
-    try {
-      const enabled = await isAutostartEnabled();
-      setSettings((current) =>
-        current ? { ...current, launch_on_system_startup: enabled } : current
-      );
-    } catch (err) {
-      console.error("Failed to read autostart state", err);
-    }
-
-    const max = await currentWindow.isMaximized();
-    setIsMaximized(max);
-
-    invoke("cmd_show_main_window");
-  });
-
-  // Debounced auto-save
-  let saveTimeout: number | undefined;
-  createEffect(() => {
-    const s = settings();
-    if (!s) return;
-
-    if (saveTimeout !== undefined) {
-      clearTimeout(saveTimeout);
-    }
-
-    saveTimeout = window.setTimeout(async () => {
-      setSaving(true);
-      try {
-        await updateSettings(s);
-      } catch (err) {
-        console.error("Failed to save settings", err);
-      } finally {
-        setSaving(false);
-      }
-    }, 300);
-  });
-
-  const update = <K extends keyof Settings>(key: K, value: Settings[K]) => {
-    setSettings((current) => {
-      if (!current) return current;
-      return { ...current, [key]: value };
-    });
-  };
-
-  const updateDiscord = <K extends keyof DiscordRichPresenceFields>(
-    key: K,
-    value: DiscordRichPresenceFields[K]
-  ) => {
-    setSettings((current) => {
-      if (!current) return current;
-      const discord = { ...current.discord_fields, [key]: value };
-      return { ...current, discord_fields: discord };
-    });
-  };
-
-  const onLaunch = async () => {
-    await launchGame();
-  };
-
-  const onResetSettings = async () => {
-    try {
-      // Assumes you have a Tauri command that resets to defaults and returns them.
-      const defaults = await invoke<Settings>("cmd_reset_settings");
-      setSettings(defaults);
-    } catch (err) {
-      console.error("Failed to reset settings", err);
-    }
-  };
-
-  const pickGameDirectory = async () => {
-    try {
-      const selected = await open({
-        directory: true,
-        multiple: false,
-      });
-
-      // open() can return string | string[] | null
-      if (!selected || Array.isArray(selected)) return;
-
-      update("game_directory", selected);
-    } catch (err) {
-      console.error("Failed to pick game directory", err);
-    }
-  };
-
-  const pickExecutable = async () => {
-    try {
-      const selected = await open({
-        multiple: false,
-        filters: [
-          {
-            name: "Executable",
-            extensions: ["exe"], // tweak if you need other platforms
-          },
-        ],
-      });
-
-      if (!selected || Array.isArray(selected)) return;
-
-      update("executable_path", selected);
-    } catch (err) {
-      console.error("Failed to pick executable", err);
-    }
-  };
-
-
-
-  const setLaunchOnStartup = async (enabled: boolean) => {
-    // persist to your settings (and trigger auto-save)
-    update("launch_on_system_startup", enabled);
-
-    // actually enable/disable OS autostart
-    try {
-      if (enabled) {
-        await enableAutostart();
-      } else {
-        await disableAutostart();
-      }
-    } catch (err) {
-      console.error("Failed to update autostart", err);
-    }
-  };
+function App() {
+  const {
+    status,
+    s,
+    reload,
+    updateSetting,
+    updateDiscordField,
+    reset,
+  } = useSettings();
 
   return (
-    <div class="min-h-screen bg-slate-900 text-slate-100">
-      <div class="h-full flex flex-col">
-        <Titlebar
-          isMaximized={isMaximized()}
-          onMinimize={handleMinimize}
-          onToggleMaximize={handleToggleMaximize}
-          onClose={handleClose}
-          onHeaderMouseDown={handleHeaderMouseDown}
-          onHeaderDoubleClick={handleHeaderDoubleClick}
-        />
+    <div class="h-screen flex flex-col bg-gradient-to-br from-black via-[#050816] to-black text-zinc-100">
+      <Titlebar />
 
-        <main class="flex-1 overflow-auto px-8 py-6">
-          <div class="space-y-6">
-            <p class="text-sm text-slate-400">
-              Configure how this companion app behaves, how your status appears
-              on Discord, and how the game is launched.
-            </p>
+      <Show when={status() === "loading"}>
+        <main class="flex-1 flex items-center justify-center text-xs text-zinc-400">
+          Loading settings…
+        </main>
+      </Show>
 
-            <Show
-              when={!loading()}
-              fallback={<p class="text-slate-400">Loading settings…</p>}
-            >
-              <Show
-                when={settings()}
-                fallback={<p class="text-red-400">Failed to load settings.</p>}
-              >
-                {(s) => (
-                  <div class="space-y-5 text-sm">
-                    <GeneralSection
-                      settings={s()}
-                      onUpdateSetting={update}
-                      onSetLaunchOnStartup={setLaunchOnStartup}
-                    />
+      <Show when={status() === "error"}>
+        <main class="flex-1 flex flex-col items-center justify-center text-xs text-zinc-300 gap-2">
+          <div>Failed to load settings from backend.</div>
+          <button
+            type="button"
+            class="h-7 px-3 rounded-md border border-orange-500/60 text-[11px] text-orange-100 bg-zinc-900/80 hover:bg-orange-500/80 hover:text-black transition"
+            onClick={reload}
+          >
+            Retry
+          </button>
+        </main>
+      </Show>
 
-                    <DiscordSection
-                      discord={s().discord_fields}
-                      onUpdateDiscord={updateDiscord}
-                    />
+      <Show when={status() === "ready"}>
+        <main class="flex-1 overflow-auto px-1 py-1">
+          <div class="space-y-2">
+            <GeneralSection
+              settings={s()}
+              updateSetting={updateSetting}
+            />
 
-                    <LaunchOptionsSection
-                      settings={s()}
-                      launchMethodLabels={launchMethodLabels}
-                      onUpdateSetting={update}
-                      onLaunch={onLaunch}
-                      onBrowseExecutable={pickExecutable}
-                    />
+            <DiscordSection
+              discordFields={s().discord_fields}
+              updateDiscordField={updateDiscordField}
+            />
 
+            <LaunchSection
+              settings={s()}
+              updateSetting={updateSetting}
+            />
 
-                    <AdvancedSection
-                      settings={s()}
-                      logLevels={logLevels}
-                      onUpdateSetting={update}
-                      onReset={onResetSettings}
-                      onBrowseGameDirectory={pickGameDirectory}
-                    />
-                  </div>
-
-                )}
-              </Show>
-            </Show>
+            <AdvancedSection
+              settings={s()}
+              updateSetting={updateSetting}
+              onReset={reset}
+            />
           </div>
         </main>
-      </div>
+      </Show>
     </div>
   );
 }
+
+export default App;

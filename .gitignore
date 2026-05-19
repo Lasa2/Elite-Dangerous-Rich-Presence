@@ -1,2 +1,6 @@
 node_modules
 dist
+
+# Claude Code (kept out of repo by current policy)
+.claude/
+CLAUDE.md
